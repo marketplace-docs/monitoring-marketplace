@@ -379,14 +379,17 @@ export default function Home() {
                     }
                 },
                 datalabels: {
-                    color: '#fff',
+                    color: '#000000',
                     anchor: 'end',
                     align: 'top',
                     font: {
                         weight: 'bold'
                     },
                     formatter: (value) => {
-                        return new Intl.NumberFormat('en-US').format(value);
+                        if (value > 0) {
+                           return new Intl.NumberFormat('en-US').format(value);
+                        }
+                        return '';
                     }
                 }
               },
