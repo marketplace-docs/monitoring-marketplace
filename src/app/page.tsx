@@ -38,24 +38,37 @@ export default function Home() {
     const hours = generateHours();
 
     const initialBacklogData = [
-      { platform: "Shopee", payment_order: "0", source: "Edit by Sociolla" },
-      { platform: "Shopee Amuse", payment_order: "0", source: "Amuse Official Store" },
-      { platform: "Shopee Ariul", payment_order: "0", source: "Ariul Official Store" },
-      { platform: "Shopee COSRX", payment_order: "0", source: "COSRX Official Store" },
-      { platform: "Shopee Derma Angel", payment_order: "0", source: "Derma Angel Official Store" },
-      { platform: "Shopee Dr G", payment_order: "0", source: "Dr G Official Store" },
-      { platform: "Shopee Espoir", payment_order: "0", source: "Espoir Official Store" },
-      { platform: "Shopee Jung Saem Mool", payment_order: "0", source: "Jung Saem Mool Official Store" },
-      { platform: "Shopee Lilla", payment_order: "0", source: "Lilla Official store" },
-      { platform: "Shopee Lilla Baby", payment_order: "0", source: "Lilla Baby Indonesia" },
-      { platform: "Shopee Mediheal", payment_order: "0", source: "Mediheal Official Store" },
-      { platform: "Shopee Round Lab", payment_order: "0", source: "Round Lab Official Store" },
-      { platform: "Shopee Speak to me", payment_order: "0", source: "Speak to me Official Store" },
-      { platform: "Shopee Sukin", payment_order: "0", source: "Sukin Official Store" },
-      { platform: "Shopee UB Mom", payment_order: "0", source: "UB Mom Indonesia" },
-      { platform: "Shopee UIQ", payment_order: "0", source: "UIQ Official Store" },
-      { platform: "tiktok_cosrx", payment_order: "0", source: "COSRX Official Store" },
-      { platform: "tiktok_derma_angel", payment_order: "0", source: "Derma Angel Official Store" },
+        { source: "Jung Saem Mool Official Store", platform: "Shopee Jung Saem Mool", payment_order: "0" },
+        { source: "Amuse Official Store", platform: "Shopee Amuse", payment_order: "0" },
+        { source: "Carasun.id Official Store", platform: "Shopee Carasun", payment_order: "0" },
+        { source: "Ariul Official Store", platform: "Shopee Ariul", payment_order: "0" },
+        { source: "Dr G Official Store", platform: "Shopee Dr G", payment_order: "0" },
+        { source: "Im From Official Store", platform: "Shopee Im From", payment_order: "0" },
+        { source: "COSRX Official Store", platform: "Shopee COSRX", payment_order: "0" },
+        { source: "Espoir Official Store", platform: "Shopee Espoir", payment_order: "0" },
+        { source: "Mediheal Official Store", platform: "Shopee Mediheal", payment_order: "0" },
+        { source: "Keana Official Store", platform: "Shopee Keana", payment_order: "0" },
+        { source: "Lilla Baby Indonesia", platform: "Shopee Lilla Baby", payment_order: "0" },
+        { source: "Lilla Official store", platform: "Shopee lilla", payment_order: "0" },
+        { source: "Edit by Sociolla", platform: "Shopee", payment_order: "0" },
+        { source: "Round Lab Official Store", platform: "Shopee Round Lab", payment_order: "0" },
+        { source: "Speak To Me Official Store", platform: "Shopee Speak to me", payment_order: "0" },
+        { source: "Sukin Official Store", platform: "Shopee Sukin", payment_order: "0" },
+        { source: "Woshday Official Store", platform: "Shopee Woshday", payment_order: "0" },
+        { source: "Gemistry Official Store", platform: "Shopee Gemistry", payment_order: "0" },
+        { source: "Sungboon Editor Official Store", platform: "Shopee Sungboon Editor", payment_order: "0" },
+        { source: "Derma Angel Official Store", platform: "Shopee Derma Angel", payment_order: "0" },
+        { source: "UIQ Official Store", platform: "Shopee UIQ", payment_order: "0" },
+        { source: "UB Mom Indonesia", platform: "Shopee UB Mom", payment_order: "0" },
+        { source: "Bioheal Official Store", platform: "Shopee Bioheal", payment_order: "0" },
+        { source: "COSRX Official Store", platform: "Lazada Cosrx", payment_order: "0" },
+        { source: "Lilla Official store", platform: "tiktok_lilla", payment_order: "0" },
+        { source: "COSRX Official Store", platform: "tiktok_cosrx", payment_order: "0" },
+        { source: "Carasun.id Official Store", platform: "tiktok_carasun", payment_order: "0" },
+        { source: "Derma Angel Official Store", platform: "tiktok_derma_angel", payment_order: "0" },
+        { source: "Lilla Baby Indonesia", platform: "tiktok_lilla_Baby", payment_order: "0" },
+        { source: "Edit by Sociolla", platform: "tiktok", payment_order: "0" },
+        { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0" },
     ];
 
     const showToast = (message: string, type: 'success' | 'error') => {
@@ -885,3 +898,5 @@ export default function Home() {
     </>
   );
 }
+
+    
