@@ -260,7 +260,7 @@ export default function Home() {
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
 
-        const marketplaceStoreCount = new Set(backlogData.map(item => item.source)).size;
+        const marketplaceStoreCount = new Set(backlogData.map(item => item.platform)).size;
         
         summary = {
             totalPickOrder,
@@ -359,9 +359,7 @@ export default function Home() {
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  display: true,
-                  position: 'top',
-                  align: 'end',
+                  display: false,
                 },
                 tooltip: {
                     callbacks: {
@@ -393,7 +391,7 @@ export default function Home() {
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: 'rgba(200, 200, 200, 0.2)'
+                    color: '#E5E7EB'
                   },
                   ticks: {
                     callback: function(value) {
@@ -616,7 +614,7 @@ export default function Home() {
                                 <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500">0</p>
                             </div>
                         </div>
-                        <div className="h-96 bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
+                        <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-md p-4">
                            <canvas id="backlog-chart"></canvas>
                         </div>
                       </div>
