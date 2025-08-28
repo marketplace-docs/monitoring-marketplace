@@ -334,11 +334,12 @@ export default function Home() {
 
           const labels = Object.keys(groupedData);
           const data = Object.values(groupedData);
+          const maxDataValue = Math.max(...data);
 
           const chartColors = [
               'rgba(59, 130, 246, 0.8)', 
+              'rgba(239, 68, 68, 0.8)',
               'rgba(34, 197, 94, 0.8)', 
-              'rgba(239, 68, 68, 0.8)', 
               'rgba(249, 115, 22, 0.8)', 
               'rgba(168, 85, 247, 0.8)', 
               'rgba(234, 179, 8, 0.8)'
@@ -386,10 +387,7 @@ export default function Home() {
                         weight: 'bold'
                     },
                     formatter: (value) => {
-                        if (value > 0) {
-                           return new Intl.NumberFormat('en-US').format(value);
-                        }
-                        return '';
+                       return new Intl.NumberFormat('en-US').format(value);
                     }
                 }
               },
@@ -404,7 +402,8 @@ export default function Home() {
                     callback: function(value) {
                         return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(Number(value));
                     }
-                  }
+                  },
+                  max: maxDataValue * 1.2
                 },
                  x: {
                     grid: {
