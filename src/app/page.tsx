@@ -750,10 +750,10 @@ export default function Home() {
                         </div>
                     </div>
                     <div id={`${sec.id}-content`} className="hidden">
-                        <div className="overflow-x-auto pb-4 mt-6 -mx-4 px-4">
-                            <div id={`${sec.id}-input-container`} className="grid grid-cols-12 gap-4"></div>
+                        <div className="overflow-x-auto py-4 mt-6 -mx-4 px-4">
+                            <div id={`${sec.id}-input-container`} className="grid grid-flow-col auto-cols-max gap-4"></div>
                         </div>
-                        <div className="mt-8 h-80">
+                        <div className="mt-4 h-80">
                             <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
                             <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
