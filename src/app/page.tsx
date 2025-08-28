@@ -802,15 +802,6 @@ export default function Home() {
                         </div>
                         <div className="mt-8 relative h-96">
                              <canvas id={`${sec.id}-chart`}></canvas>
-                             <div className="flex justify-center items-center flex-wrap gap-x-4 gap-y-2 mt-4">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">Grafik Total {sec.title.split(' ')[1]}</h3>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3.5 h-3.5 rounded" style={{backgroundColor: sec.color}}></div>
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Jumlah Order {sec.title.split(' ')[1]}</span>
-                                </div>
-                             </div>
                         </div>
                     </div>
                 </div>
@@ -852,5 +843,3 @@ export default function Home() {
     </>
   );
 }
-
-    
