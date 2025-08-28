@@ -1,6 +1,6 @@
 "use client"
 import { useEffect } from 'react';
-import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2 } from 'lucide-react';
+import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export default function Home() {
   useEffect(() => {
@@ -18,6 +18,8 @@ export default function Home() {
     let packChartInstance: any;
     let shippedChartInstance: any;
     let backlogChartInstance: any; 
+    let currentPage = 1;
+    let recordsPerPage = 5;
 
     const generateHours = () => {
         const hours = [];
@@ -232,6 +234,7 @@ export default function Home() {
                         }
                     });
                     backlogData = [...newBacklogData];
+                    currentPage = 1;
                     updateDashboard();
                     document.getElementById('backlog-content')?.classList.remove('hidden');
                     showToast('Upload CSV Backlog berhasil!', 'success');
@@ -260,7 +263,7 @@ export default function Home() {
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
 
-        const marketplaceStoreCount = new Set(backlogData.map(item => item.platform)).size;
+        const marketplaceStoreCount = new Set(backlogData.map(item => item.source)).size;
         
         summary = {
             totalPickOrder,
@@ -333,12 +336,12 @@ export default function Home() {
           const data = Object.values(groupedData);
 
           const chartColors = [
-              'rgba(54, 162, 235, 0.8)', 
-              'rgba(75, 192, 192, 0.8)', 
-              'rgba(255, 99, 132, 0.8)', 
-              'rgba(255, 206, 86, 0.8)', 
-              'rgba(153, 102, 255, 0.8)', 
-              'rgba(255, 159, 64, 0.8)' 
+              'rgba(59, 130, 246, 0.8)', 
+              'rgba(34, 197, 94, 0.8)', 
+              'rgba(239, 68, 68, 0.8)', 
+              'rgba(249, 115, 22, 0.8)', 
+              'rgba(168, 85, 247, 0.8)', 
+              'rgba(234, 179, 8, 0.8)'
           ];
 
           backlogChartInstance = new Chart(backlogCtx, {
@@ -383,7 +386,7 @@ export default function Home() {
                         weight: 'bold'
                     },
                     formatter: (value) => {
-                        return value > 0 ? new Intl.NumberFormat('en-US').format(value) : '';
+                        return value > 999 ? new Intl.NumberFormat('en-US').format(value) : '';
                     }
                 }
               },
@@ -420,8 +423,12 @@ export default function Home() {
         const tableBody = document.getElementById('backlog-table-body');
         if (!tableBody) return;
 
-        tableBody.innerHTML = ''; 
-        backlogData.forEach(item => {
+        tableBody.innerHTML = '';
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        const paginatedData = backlogData.slice(startIndex, endIndex);
+
+        paginatedData.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
@@ -431,8 +438,36 @@ export default function Home() {
             `;
             tableBody.appendChild(row);
         });
+        updatePaginationControls();
     };
+    
+    const updatePaginationControls = () => {
+      const pageInfo = document.getElementById('page-info');
+      const totalRecords = backlogData.length;
+      const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
+      const startRecord = (currentPage - 1) * recordsPerPage + 1;
+      const endRecord = Math.min(currentPage * recordsPerPage, totalRecords);
+
+      if (pageInfo) {
+          pageInfo.innerText = `${startRecord}-${endRecord} of ${totalRecords}`;
+      }
+
+      (document.getElementById('first-page') as HTMLButtonElement).disabled = currentPage === 1;
+      (document.getElementById('prev-page') as HTMLButtonElement).disabled = currentPage === 1;
+      (document.getElementById('next-page') as HTMLButtonElement).disabled = currentPage === totalPages;
+      (document.getElementById('last-page') as HTMLButtonElement).disabled = currentPage === totalPages;
+    }
+
+    const changePage = (page: number) => {
+        const totalRecords = backlogData.length;
+        const totalPages = Math.ceil(totalRecords / recordsPerPage);
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+        renderBacklogTable();
+    }
+    
     const theme = localStorage.getItem('theme');
     if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -486,6 +521,21 @@ export default function Home() {
     if (backlogFilter) {
       backlogFilter.addEventListener('change', renderCharts);
     }
+    
+    document.getElementById('records-per-page')?.addEventListener('change', (e) => {
+      recordsPerPage = parseInt((e.target as HTMLSelectElement).value, 10);
+      currentPage = 1;
+      renderBacklogTable();
+    });
+
+    document.getElementById('first-page')?.addEventListener('click', () => changePage(1));
+    document.getElementById('prev-page')?.addEventListener('click', () => changePage(currentPage - 1));
+    document.getElementById('next-page')?.addEventListener('click', () => changePage(currentPage + 1));
+    document.getElementById('last-page')?.addEventListener('click', () => {
+      const totalRecords = backlogData.length;
+      const totalPages = Math.ceil(totalRecords / recordsPerPage);
+      changePage(totalPages);
+    });
 
   }, []);
 
@@ -593,6 +643,29 @@ export default function Home() {
                             </tbody>
                         </table>
                       </div>
+                      <div className="flex items-center justify-end space-x-2 py-4 text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">Records per page:</span>
+                        <select id="records-per-page" className="border rounded-md px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="30">30</option>
+                        </select>
+                        <span id="page-info" className="text-gray-500 dark:text-gray-400 w-24 text-center">1-5 of 31</span>
+                        <div className="flex items-center space-x-1">
+                            <button id="first-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <ChevronsLeft className="w-5 h-5" />
+                            </button>
+                            <button id="prev-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <ChevronRight className="w-5 h-5 transform rotate-180" />
+                            </button>
+                            <button id="next-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                            <button id="last-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <ChevronsRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                      </div>
                       <div className="mt-6">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Grafik Backlog Marketplace Store</h3>
@@ -614,7 +687,7 @@ export default function Home() {
                                 <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500">0</p>
                             </div>
                         </div>
-                        <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-md p-4">
+                        <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-md p-4" style={{background: 'linear-gradient(180deg, #1E293B 0%, #334155 100%)'}}>
                            <canvas id="backlog-chart"></canvas>
                         </div>
                       </div>
