@@ -276,13 +276,44 @@ export default function Home() {
         const ChartDataLabels = (await import('chartjs-plugin-datalabels')).default;
         Chart.register(ChartDataLabels);
 
-        // No charts in this design yet
+        if (backlogChartInstance) {
+          backlogChartInstance.destroy();
+        }
+
+        const backlogCtx = document.getElementById('backlog-chart') as HTMLCanvasElement;
+        if (backlogCtx) {
+          const labels = backlogData.map(item => item.platform);
+          const data = backlogData.map(item => parseInt(item.payment_order, 10));
+
+          backlogChartInstance = new Chart(backlogCtx, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Payment Accepted',
+                data: data,
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
     };
 
     const updateDashboard = () => {
         updateSummary();
         renderBacklogTable();
-        // renderCharts(); // Charts are not in the new design yet
+        renderCharts();
     };
     
     const renderBacklogTable = () => {
@@ -344,6 +375,7 @@ export default function Home() {
         document.body.classList.toggle('dark');
         const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
         localStorage.setItem('theme', currentTheme);
+        renderCharts();
     });
 
   }, []);
@@ -470,7 +502,6 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="h-64 bg-gray-100 dark:bg-gray-700/50 rounded-md p-4">
-                           {/* Placeholder for chart */}
                            <canvas id="backlog-chart"></canvas>
                         </div>
                       </div>
