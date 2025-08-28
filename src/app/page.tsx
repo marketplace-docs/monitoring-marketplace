@@ -628,18 +628,21 @@ export default function Home() {
         makeEditable('jumlah-picker', (value) => {
             // Here you would normally save the value to a backend
             console.log('Picker count saved:', value);
+            showToast('Jumlah picker disimpan!', 'success');
         });
     });
 
     document.getElementById('edit-packer-btn')?.addEventListener('click', () => {
         makeEditable('jumlah-packer', (value) => {
             console.log('Packer count saved:', value);
+            showToast('Jumlah packer disimpan!', 'success');
         });
     });
 
     document.getElementById('edit-dispatcher-btn')?.addEventListener('click', () => {
         makeEditable('jumlah-dispatcher', (value) => {
             console.log('Dispatcher count saved:', value);
+            showToast('Jumlah dispatcher disimpan!', 'success');
         });
     });
 
@@ -664,7 +667,7 @@ export default function Home() {
             </header>
 
             <div>
-                 <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                     From <span className="font-medium text-green-500">payment</span> to progress — only cleared orders move forward to <span className="font-medium text-red-500">pick</span>, <span className="font-medium text-orange-500">pack</span>, and <span className="font-medium text-purple-500">ship</span>.
                 </p>
             </div>
@@ -714,7 +717,6 @@ export default function Home() {
                     </div>
                     <div id="marketplace-performance-content" className="p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        {/* <!-- Card Jumlah Picker --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                           <div className="flex justify-between items-start">
                             <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Picker</p>
@@ -725,7 +727,6 @@ export default function Home() {
                           </div>
                           <p id="jumlah-picker" className="text-2xl font-bold mt-2">0</p>
                         </div>
-                        {/* <!-- Card Jumlah Packer --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                             <div className="flex justify-between items-start">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Packer</p>
@@ -736,7 +737,6 @@ export default function Home() {
                             </div>
                             <p id="jumlah-packer" className="text-2xl font-bold mt-2">0</p>
                         </div>
-                        {/* <!-- Card Jumlah Dispatcher --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                             <div className="flex justify-between items-start">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Dispatcher</p>
@@ -747,7 +747,6 @@ export default function Home() {
                             </div>
                             <p id="jumlah-dispatcher" className="text-2xl font-bold mt-2">0</p>
                         </div>
-                        {/* <!-- Card Performance Picker --> */}
                         <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300">Performance Picker</p>
@@ -755,7 +754,6 @@ export default function Home() {
                             </div>
                             <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         </div>
-                        {/* <!-- Card Performance Packer --> */}
                         <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300">Performance Packer</p>
@@ -763,7 +761,6 @@ export default function Home() {
                             </div>
                             <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         </div>
-                        {/* <!-- Card Performance Dispatcher --> */}
                         <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300">Performance Dispatcher</p>
@@ -771,7 +768,6 @@ export default function Home() {
                             </div>
                             <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         </div>
-                         {/* <!-- Card Average Pick / Hour --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Average Pick / Hour</p>
@@ -779,7 +775,6 @@ export default function Home() {
                             </div>
                             <BarChart3 className="w-6 h-6 text-purple-500" />
                         </div>
-                        {/* <!-- Card Average Pack / Hour --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Average Pack / Hour</p>
@@ -787,7 +782,6 @@ export default function Home() {
                             </div>
                             <Clock className="w-6 h-6 text-red-500" />
                         </div>
-                        {/* <!-- Card Average Shipped / Hour --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Average Shipped / Hour</p>
@@ -801,13 +795,12 @@ export default function Home() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
-                         <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                              <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
-                         </div>
-                         <ChevronRight id="backlog-chevron" className="chevron-icon w-5 h-5 transition-transform" />
+                        </div>
                     </div>
                     <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-end gap-2 mb-4 mt-4">
+                        <div className="flex justify-end gap-2 my-4">
                             <button id="edit-backlog-btn" className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
                             </button>
