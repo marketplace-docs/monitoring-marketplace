@@ -271,6 +271,11 @@ export default function Home() {
         updatePerfCard('card-performance-picker', performancePicker);
         updatePerfCard('card-performance-packer', performancePacker);
         updatePerfCard('card-performance-shipped', performanceShipped);
+
+        document.querySelectorAll('.total-pick-summary').forEach(el => el.textContent = totalPickOrder.toLocaleString());
+        document.querySelectorAll('.total-pack-summary').forEach(el => el.textContent = totalPackOrder.toLocaleString());
+        document.querySelectorAll('.total-shipped-summary').forEach(el => el.textContent = totalShippedOrder.toLocaleString());
+
     };
 
     const renderChart = (canvasId: string, chartType: 'bar' | 'line', labels: string[], data: number[], label: string, color: string) => {
@@ -322,7 +327,7 @@ export default function Home() {
         const endPickHour = parseInt((document.getElementById('pick-end-hour') as HTMLInputElement).value, 10);
         const filteredPickHours = hours.slice(startPickHour, endPickHour + 1);
         const filteredPickData = pickData.slice(startPickHour, endPickHour + 1);
-        renderChart('pick-chart', 'bar', filteredPickHours, filteredPickData, 'Total Picked', '#4f46e5');
+        renderChart('pick-chart', 'bar', filteredPickHours, filteredPickData, 'Total Picked', '#ef4444');
 
         const startPackHour = parseInt((document.getElementById('pack-start-hour') as HTMLInputElement).value, 10);
         const endPackHour = parseInt((document.getElementById('pack-end-hour') as HTMLInputElement).value, 10);
@@ -369,12 +374,12 @@ export default function Home() {
             const container = document.getElementById(containerId);
             if (!container) return;
             container.innerHTML = '';
-            hours.forEach((hour, index) => {
+            hours.slice(0, 24).forEach((hour, index) => { // Only 00:00 to 23:00
                 const div = document.createElement('div');
                 div.className = 'flex-none w-24 text-center';
                 div.innerHTML = `
                     <label class="block text-sm text-gray-500 dark:text-gray-400">${hour}</label>
-                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center bg-transparent border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-indigo-500" value="0" min="0">
+                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" value="0" min="0">
                 `;
                 container.appendChild(div);
             });
@@ -723,28 +728,32 @@ export default function Home() {
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
-                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
+                            <span className={`text-sm font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
+                        </div>
                         <div className="flex items-center gap-2">
-                            <div className="hidden sm:flex items-center space-x-2">
-                                <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-400">From:</label>
-                                <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border dark:bg-gray-700 dark:border-gray-600 rounded-md text-center" />
-                                <label htmlFor={`${sec.id}-end-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-400">To:</label>
-                                <input type="number" id={`${sec.id}-end-hour`} defaultValue="24" min="0" max="24" className="w-16 p-1 border dark:bg-gray-700 dark:border-gray-600 rounded-md text-center" />
+                           <div className="hidden sm:flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                                <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
+                                <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
+                                <label htmlFor={`${sec.id}-end-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">To:</label>
+                                <input type="number" id={`${sec.id}-end-hour`} defaultValue="24" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
                             </div>
-                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow">
                                 <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
                             </button>
-                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow">
                                 <Download size={16} /> <span className="hidden sm:inline">Export</span>
                             </button>
                             <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
                     </div>
-                    <div id={`${sec.id}-content`}>
-                        <div className="overflow-x-auto pb-4 mt-4 -mx-4 px-4">
-                            <div id={`${sec.id}-input-container`} className="flex space-x-2 min-w-[1200px]"></div>
+                    <div id={`${sec.id}-content`} className="hidden">
+                        <div className="overflow-x-auto pb-4 mt-6 -mx-4 px-4">
+                            <div id={`${sec.id}-input-container`} className="grid grid-cols-12 gap-4"></div>
                         </div>
-                        <div className="mt-4 h-80">
+                        <div className="mt-8 h-80">
                             <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
                             <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
@@ -771,7 +780,6 @@ export default function Home() {
             10%, 90% { opacity: 1; transform: translateY(0); }
         }
         #picker-input, #packer-input, #dispatcher-input {
-            width: 100%;
             -moz-appearance: textfield;
         }
         #picker-input::-webkit-outer-spin-button,
@@ -793,5 +801,3 @@ export default function Home() {
     </>
   );
 }
-
-    
