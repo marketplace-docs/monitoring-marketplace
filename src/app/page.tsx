@@ -451,9 +451,9 @@ export default function Home() {
     const setupCollapsible = () => {
         document.querySelectorAll('[data-collapsible-trigger]').forEach(trigger => {
             trigger.addEventListener('click', (event) => {
-                const target = event.target as HTMLElement;
+                const targetEl = event.target as HTMLElement;
                 // Ignore clicks on interactive elements within the header
-                if (target.closest('button, a, input, select')) {
+                if (targetEl.closest('button, a, input, select')) {
                     return;
                 }
 
@@ -464,7 +464,7 @@ export default function Home() {
                 if (content && icon) {
                     const isHidden = content.classList.contains('hidden');
                     content.classList.toggle('hidden');
-                    icon.classList.toggle('rotate-180', isHidden);
+                    icon.classList.toggle('rotate-180', !isHidden);
                 }
             });
         });
@@ -609,7 +609,7 @@ export default function Home() {
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Marketplace Performance</h2>
                     <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
                 </div>
-                <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 hidden">
                     {/* Row 1 */}
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
                         <div className="flex justify-between items-start">
@@ -709,7 +709,7 @@ export default function Home() {
                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                 </div>
-                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4">
+                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4 hidden">
                     <div className="lg:col-span-3 overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -771,7 +771,7 @@ export default function Home() {
                             <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
                     </div>
-                    <div id={`${sec.id}-content`} className="hidden pt-4">
+                    <div id={`${sec.id}-content`} className="pt-4 hidden">
                         <div id={`${sec.id}-input-container`} className="space-y-4"></div>
                         <div className="mt-6 h-80">
                             <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
