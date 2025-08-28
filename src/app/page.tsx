@@ -631,6 +631,7 @@ export default function Home() {
                             <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
                                 <Download size={14} /> Export
                             </button>
+                            <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                         </div>
                     </div>
                     <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
