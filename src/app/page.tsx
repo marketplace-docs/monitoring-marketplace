@@ -320,7 +320,9 @@ export default function Home() {
         }
 
         if (chartInstance) {
-            chartInstance.destroy();
+            chartInstance.data.datasets[0].data = data;
+            chartInstance.update();
+            return;
         }
 
         if (ctx) {
@@ -375,10 +377,6 @@ export default function Home() {
         const ChartDataLabels = (await import('chartjs-plugin-datalabels')).default;
         Chart.register(ChartDataLabels);
 
-        if (backlogChartInstance) {
-          backlogChartInstance.destroy();
-        }
-
         const backlogCtx = document.getElementById('backlog-chart') as HTMLCanvasElement;
         if (backlogCtx) {
           const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
@@ -420,78 +418,86 @@ export default function Home() {
               'rgba(168, 85, 247, 0.8)', 
               'rgba(234, 179, 8, 0.8)'
           ];
-
-          backlogChartInstance = new Chart(backlogCtx, {
-            type: 'bar',
-            data: {
-              labels: labels,
-              datasets: [{
-                label: 'Payment Accepted',
-                data: data,
-                backgroundColor: chartColors,
-                borderColor: chartColors.map(color => color.replace('0.8', '1')),
-                borderWidth: 1,
-                borderRadius: 5,
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('en-US').format(context.parsed.y);
-                            }
-                            return label;
-                        }
-                    }
-                },
-                datalabels: {
-                    color: isDarkMode ? '#FFFFFF' : '#000000',
-                    anchor: 'end',
-                    align: 'top',
-                    font: {
-                        weight: 'bold'
-                    },
-                    formatter: (value) => {
-                       return new Intl.NumberFormat('en-US').format(value);
-                    }
-                }
+          
+          if (backlogChartInstance) {
+              backlogChartInstance.data.labels = labels;
+              backlogChartInstance.data.datasets[0].data = data;
+              backlogChartInstance.options.scales.y.max = maxDataValue * 1.2;
+              backlogChartInstance.options.plugins.datalabels.color = isDarkMode ? '#FFFFFF' : '#000000';
+              backlogChartInstance.update();
+          } else if (backlogCtx) {
+            backlogChartInstance = new Chart(backlogCtx, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'Payment Accepted',
+                  data: data,
+                  backgroundColor: chartColors,
+                  borderColor: chartColors.map(color => color.replace('0.8', '1')),
+                  borderWidth: 1,
+                  borderRadius: 5,
+                }]
               },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: '#E5E7EB'
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false,
                   },
-                  ticks: {
-                    color: '#3B82F6',
-                    callback: function(value) {
-                        return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(Number(value));
-                    }
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              let label = context.dataset.label || '';
+                              if (label) {
+                                  label += ': ';
+                              }
+                              if (context.parsed.y !== null) {
+                                  label += new Intl.NumberFormat('en-US').format(context.parsed.y);
+                              }
+                              return label;
+                          }
+                      }
                   },
-                  max: maxDataValue * 1.2
+                  datalabels: {
+                      color: isDarkMode ? '#FFFFFF' : '#000000',
+                      anchor: 'end',
+                      align: 'top',
+                      font: {
+                          weight: 'bold'
+                      },
+                      formatter: (value) => {
+                         return new Intl.NumberFormat('en-US').format(value);
+                      }
+                  }
                 },
-                 x: {
+                scales: {
+                  y: {
+                    beginAtZero: true,
                     grid: {
-                        display: false
+                      color: '#E5E7EB'
                     },
                     ticks: {
-                       color: '#3B82F6',
-                    }
-                 }
+                      color: '#3B82F6',
+                      callback: function(value) {
+                          return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(Number(value));
+                      }
+                    },
+                    max: maxDataValue * 1.2
+                  },
+                   x: {
+                      grid: {
+                          display: false
+                      },
+                      ticks: {
+                         color: '#3B82F6',
+                      }
+                   }
+                }
               }
-            }
-          });
+            });
+          }
         }
     };
     
