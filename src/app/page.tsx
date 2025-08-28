@@ -442,7 +442,7 @@ export default function Home() {
                 if (content && icon) {
                     const isHidden = content.classList.contains('hidden');
                     content.classList.toggle('hidden');
-                    icon.classList.toggle('rotate-180', !isHidden);
+                    icon.classList.toggle('rotate-180', isHidden);
                 }
             });
         });
@@ -750,7 +750,7 @@ export default function Home() {
                         </div>
                     </div>
                     <div id={`${sec.id}-content`} className="hidden">
-                        <div className="overflow-x-auto py-4 mt-6 -mx-4 px-4">
+                         <div className="overflow-x-auto py-4 -mx-4 px-4">
                             <div id={`${sec.id}-input-container`} className="grid grid-flow-col auto-cols-max gap-4"></div>
                         </div>
                         <div className="mt-4 h-80">
@@ -795,9 +795,11 @@ export default function Home() {
             transition: transform 0.3s ease;
         }
         .rotate-180 {
-            transform: rotate(180deg);
+            transform: rotate(-180deg);
         }
       `}</style>
     </>
   );
 }
+
+    
