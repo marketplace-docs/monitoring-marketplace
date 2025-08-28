@@ -610,10 +610,91 @@ export default function Home() {
                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="marketplace-performance-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <h2 className="text-lg font-semibold">Marketplace Performance</h2>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="marketplace-performance-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                        <p>Performance content goes here...</p>
+                    <div id="marketplace-performance-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        {/* <!-- Card Jumlah Picker --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                          <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Picker</p>
+                            <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4 text-blue-500" />
+                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                            </div>
+                          </div>
+                          <p id="jumlah-picker" className="text-2xl font-bold mt-2">0</p>
+                        </div>
+                        {/* <!-- Card Jumlah Packer --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between items-start">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Packer</p>
+                                <div className="flex items-center gap-2">
+                                    <PackageCheck className="w-4 h-4 text-green-500" />
+                                    <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                                </div>
+                            </div>
+                            <p id="jumlah-packer" className="text-2xl font-bold mt-2">0</p>
+                        </div>
+                        {/* <!-- Card Jumlah Dispatcher --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between items-start">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Dispatcher</p>
+                                <div className="flex items-center gap-2">
+                                    <SendHorizonal className="w-4 h-4 text-purple-500" />
+                                    <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                                </div>
+                            </div>
+                            <p id="jumlah-dispatcher" className="text-2xl font-bold mt-2">0</p>
+                        </div>
+                        {/* <!-- Card Performance Picker --> */}
+                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Picker</p>
+                                <p id="performance-picker" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
+                            </div>
+                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                        </div>
+                        {/* <!-- Card Performance Packer --> */}
+                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Packer</p>
+                                <p id="performance-packer" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
+                            </div>
+                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                        </div>
+                        {/* <!-- Card Performance Dispatcher --> */}
+                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Dispatcher</p>
+                                <p id="performance-dispatcher" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
+                            </div>
+                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                        </div>
+                         {/* <!-- Card Average Pick / Hour --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Pick / Hour</p>
+                                <p id="avg-pick-hour" className="text-2xl font-bold">0</p>
+                            </div>
+                            <BarChart3 className="w-6 h-6 text-purple-500" />
+                        </div>
+                        {/* <!-- Card Average Pack / Hour --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Pack / Hour</p>
+                                <p id="avg-pack-hour" className="text-2xl font-bold">0</p>
+                            </div>
+                            <Clock className="w-6 h-6 text-red-500" />
+                        </div>
+                        {/* <!-- Card Average Shipped / Hour --> */}
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Shipped / Hour</p>
+                                <p id="avg-shipped-hour" className="text-2xl font-bold">0</p>
+                            </div>
+                            <Truck className="w-6 h-6 text-orange-500" />
+                        </div>
+                      </div>
                     </div>
                 </div>
 
@@ -642,7 +723,7 @@ export default function Home() {
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marketplace Store</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Store Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Platform</th>
+                                    <th scope="col" className="px6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Platform</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Accepted</th>
                                 </tr>
                             </thead>
@@ -747,3 +828,5 @@ export default function Home() {
     </>
   );
 }
+
+    
