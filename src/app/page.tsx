@@ -20,7 +20,7 @@ export default function Home() {
 
     const generateHours = () => {
         const hours = [];
-        for (let i = 0; i <= 24; i++) {
+        for (let i = 0; i < 24; i++) {
             hours.push(`${String(i).padStart(2, '0')}:00`);
         }
         return hours;
@@ -292,7 +292,7 @@ export default function Home() {
 
         const maxValue = Math.max(...data, 0);
         const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25 / 100) * 100 : 1000;
-        const stepSize = yAxisMax / 5;
+        const stepSize = yAxisMax > 1000 ? 200 : 100;
 
         chartInstances.current[canvasId] = new Chart(ctx, {
             type: chartType,
@@ -782,9 +782,9 @@ export default function Home() {
                         <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
                            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
-                                <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
+                                <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="23" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
                                 <label htmlFor={`${sec.id}-end-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">To:</label>
-                                <input type="number" id={`${sec.id}-end-hour`} defaultValue="24" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
+                                <input type="number" id={`${sec.id}-end-hour`} defaultValue="23" min="0" max="23" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
                             </div>
                             <div className="flex items-center gap-2">
                                 <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronLeft size={16}/></button>
