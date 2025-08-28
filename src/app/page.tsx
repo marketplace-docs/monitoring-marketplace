@@ -1,7 +1,7 @@
 
 "use client"
 import { useEffect } from 'react';
-import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck } from 'lucide-react';
+import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2 } from 'lucide-react';
 
 export default function Home() {
   useEffect(() => {
@@ -268,6 +268,7 @@ export default function Home() {
         setInnerText('summary-pick-total', summary.totalPickOrder.toString());
         setInnerText('summary-pack-total', summary.totalPacked.toString());
         setInnerText('summary-ship-total', summary.totalShipped.toString());
+        setInnerText('backlog-total', summary.payment.toString());
     };
 
     const renderCharts = async () => {
@@ -292,9 +293,10 @@ export default function Home() {
         backlogData.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.payment_order}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Platform</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.payment_order}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -422,21 +424,55 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
+                        <div className="flex items-center gap-2">
+                           <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                               <Pencil size={14} /> Edit
+                           </button>
+                            <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                                <Upload size={14} /> Upload
+                            </button>
+                            <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <Download size={14} /> Export
+                            </button>
+                           <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
+                        </div>
                     </div>
                     <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                             <thead className="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Store Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Order</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marketplace Store</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Store Name</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Platform</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Accepted</th>
                                 </tr>
                             </thead>
                             <tbody id="backlog-table-body" className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                             </tbody>
                         </table>
+                      </div>
+                      <div className="mt-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">Grafik Backlog Marketplace Store</h3>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                  <select className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
+                                    <option>Payment Accepted</option>
+                                  </select>
+                                  <button className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <Settings2 size={16} />
+                                  </button>
+                                </div>
+                                <div className="text-sm">
+                                    Total: <span id="backlog-total" className="font-semibold">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="h-64 bg-gray-100 dark:bg-gray-700/50 rounded-md p-4">
+                           {/* Placeholder for chart */}
+                           <canvas id="backlog-chart"></canvas>
+                        </div>
                       </div>
                     </div>
                 </div>
