@@ -563,8 +563,8 @@ export default function Home() {
             </header>
 
             <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    From <span className="text-gray-700 dark:text-gray-300 font-medium">payment</span> to progress — only cleared orders move forward to <span className="text-gray-700 dark:text-gray-300 font-medium">pick, pack, and ship.</span>
+                 <p className="text-sm text-gray-500 dark:text-gray-400">
+                    From <span className="font-medium text-green-500">payment</span> to progress — only cleared orders move forward to <span className="font-medium text-red-500">pick</span>, <span className="font-medium text-orange-500">pack</span>, and <span className="font-medium text-purple-500">ship</span>.
                 </p>
             </div>
 
