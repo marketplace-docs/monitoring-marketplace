@@ -259,7 +259,7 @@ export default function Home() {
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
 
-        const marketplaceStoreCount = new Set(backlogData.map(item => item.source)).size;
+        const marketplaceStoreCount = backlogData.length;
         
         summary = {
             totalPickOrder,
