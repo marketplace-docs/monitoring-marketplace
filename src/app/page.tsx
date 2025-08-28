@@ -312,6 +312,11 @@ export default function Home() {
             } else {
               key = item[filterValue];
             }
+             if (filterValue === 'marketplace_platform') {
+                if (key.toLowerCase().includes('shopee')) key = 'Shopee';
+                if (key.toLowerCase().includes('tiktok')) key = 'Tiktok';
+                if (key.toLowerCase().includes('lazada')) key = 'Lazada';
+            }
             
             if (groupedData[key]) {
               groupedData[key] += parseInt(item.payment_order, 10);
@@ -323,6 +328,16 @@ export default function Home() {
           const labels = Object.keys(groupedData);
           const data = Object.values(groupedData);
 
+          const coolColors = [
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(99, 255, 132, 0.6)',
+          ];
+
           backlogChartInstance = new Chart(backlogCtx, {
             type: 'bar',
             data: {
@@ -330,8 +345,8 @@ export default function Home() {
               datasets: [{
                 label: 'Payment Accepted',
                 data: data,
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: coolColors,
+                borderColor: coolColors.map(color => color.replace('0.6', '1')),
                 borderWidth: 1
               }]
             },
