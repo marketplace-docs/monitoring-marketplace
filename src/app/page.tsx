@@ -589,7 +589,7 @@ export default function Home() {
     };
 
     setupCollapsible('marketplace-performance-header', 'marketplace-performance-content');
-    setupCollapsible('backlog-header', 'backlog-content', 'backlog-chevron');
+    setupCollapsible('backlog-header', 'backlog-content');
     setupCollapsible('summary-pick-header', 'summary-pick-content');
     setupCollapsible('summary-pack-header', 'summary-pack-content');
     setupCollapsible('summary-ship-header', 'summary-ship-content');
@@ -714,8 +714,9 @@ export default function Home() {
                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="marketplace-performance-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <h2 className="text-lg font-semibold">Marketplace Performance</h2>
+                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="marketplace-performance-content" className="p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
+                    <div id="marketplace-performance-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                           <div className="flex justify-between items-start">
@@ -798,6 +799,7 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                              <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
                         </div>
+                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
                     <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex justify-end gap-2 my-4">
