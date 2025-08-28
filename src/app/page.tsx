@@ -31,37 +31,37 @@ export default function Home() {
     const hours = generateHours();
 
     const initialBacklogData = [
-        { platform: "Shopee Jung Saem Mool", payment_order: "500", source: "Jung Saem Mool Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Amuse", payment_order: "240", source: "Amuse Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Carasun", payment_order: "300", source: "Carasun.id Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Ariul", payment_order: "120", source: "Ariul Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Dr G", payment_order: "450", source: "Dr G Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Im From", payment_order: "200", source: "Im From Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee COSRX", payment_order: "800", source: "COSRX Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Espoir", payment_order: "150", source: "Espoir Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Mediheal", payment_order: "250", source: "Mediheal Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Keana", payment_order: "100", source: "Keana Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Lilla Baby", payment_order: "50", source: "Lilla Baby Indonesia", marketplace_platform: "Shopee" },
-        { platform: "Shopee lilla", payment_order: "80", source: "Lilla Official store", marketplace_platform: "Shopee" },
-        { platform: "Shopee", payment_order: "1200", source: "Edit by Sociolla", marketplace_platform: "Shopee" },
-        { platform: "Shopee Round Lab", payment_order: "320", source: "Round Lab Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Speak to me", payment_order: "40", source: "Speak To Me Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Sukin", payment_order: "90", source: "Sukin Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Woshday", payment_order: "20", source: "Woshday Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Gemistry", payment_order: "60", source: "Gemistry Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Sungboon Editor", payment_order: "180", source: "Sungboon Editor Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee Derma Angel", payment_order: "110", source: "Derma Angel Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee UIQ", payment_order: "70", source: "UIQ Official Store", marketplace_platform: "Shopee" },
-        { platform: "Shopee UB Mom", payment_order: "30", source: "UB Mom Indonesia", marketplace_platform: "Shopee" },
-        { platform: "Shopee Bioheal", payment_order: "139", source: "Bioheal Official Store", marketplace_platform: "Shopee" },
-        { platform: "Lazada Cosrx", payment_order: "234", source: "COSRX Official Store", marketplace_platform: "Lazada" },
-        { platform: "tiktok_lilla", payment_order: "400", source: "Lilla Official store", marketplace_platform: "Tiktok" },
-        { platform: "tiktok_cosrx", payment_order: "550", source: "COSRX Official Store", marketplace_platform: "Tiktok" },
-        { platform: "tiktok_carasun", payment_order: "210", source: "Carasun.id Official Store", marketplace_platform: "Tiktok" },
-        { platform: "tiktok_derma_angel", payment_order: "80", source: "Derma Angel Official Store", marketplace_platform: "Tiktok" },
-        { platform: "tiktok_lilla_Baby", payment_order: "40", source: "Lilla Baby Indonesia", marketplace_platform: "Tiktok" },
-        { platform: "tiktok", payment_order: "300", source: "Edit by Sociolla", marketplace_platform: "Tiktok" },
-        { platform: "tiktok_roundlab", payment_order: "158", source: "Round Lab Official Store", marketplace_platform: "Tiktok" },
+      { platform: "Shopee Jung Saem Mool", payment_order: "500", source: "Jung Saem Mool Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Amuse", payment_order: "240", source: "Amuse Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Carasun", payment_order: "300", source: "Carasun.id Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Ariul", payment_order: "120", source: "Ariul Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Dr G", payment_order: "450", source: "Dr G Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Im From", payment_order: "200", source: "Im From Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee COSRX", payment_order: "800", source: "COSRX Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Espoir", payment_order: "150", source: "Espoir Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Mediheal", payment_order: "250", source: "Mediheal Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Keana", payment_order: "100", source: "Keana Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Lilla Baby", payment_order: "50", source: "Lilla Baby Indonesia", marketplace_platform: "Shopee" },
+      { platform: "Shopee lilla", payment_order: "80", source: "Lilla Official store", marketplace_platform: "Shopee" },
+      { platform: "Shopee", payment_order: "1200", source: "Edit by Sociolla", marketplace_platform: "Shopee" },
+      { platform: "Shopee Round Lab", payment_order: "320", source: "Round Lab Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Speak to me", payment_order: "40", source: "Speak To Me Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Sukin", payment_order: "90", source: "Sukin Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Woshday", payment_order: "20", source: "Woshday Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Gemistry", payment_order: "60", source: "Gemistry Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Sungboon Editor", payment_order: "180", source: "Sungboon Editor Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee Derma Angel", payment_order: "110", source: "Derma Angel Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee UIQ", payment_order: "70", source: "UIQ Official Store", marketplace_platform: "Shopee" },
+      { platform: "Shopee UB Mom", payment_order: "30", source: "UB Mom Indonesia", marketplace_platform: "Shopee" },
+      { platform: "Shopee Bioheal", payment_order: "139", source: "Bioheal Official Store", marketplace_platform: "Shopee" },
+      { platform: "Lazada Cosrx", payment_order: "234", source: "COSRX Official Store", marketplace_platform: "Lazada" },
+      { platform: "tiktok_lilla", payment_order: "400", source: "Lilla Official store", marketplace_platform: "Tiktok" },
+      { platform: "tiktok_cosrx", payment_order: "550", source: "COSRX Official Store", marketplace_platform: "Tiktok" },
+      { platform: "tiktok_carasun", payment_order: "210", source: "Carasun.id Official Store", marketplace_platform: "Tiktok" },
+      { platform: "tiktok_derma_angel", payment_order: "80", source: "Derma Angel Official Store", marketplace_platform: "Tiktok" },
+      { platform: "tiktok_lilla_Baby", payment_order: "40", source: "Lilla Baby Indonesia", marketplace_platform: "Tiktok" },
+      { platform: "tiktok", payment_order: "300", source: "Edit by Sociolla", marketplace_platform: "Tiktok" },
+      { platform: "tiktok_roundlab", payment_order: "158", source: "Round Lab Official Store", marketplace_platform: "Tiktok" },
     ];
 
 
@@ -333,12 +333,12 @@ export default function Home() {
           const data = Object.values(groupedData);
 
           const chartColors = [
-              'rgba(54, 162, 235, 0.8)', // Shopee - Blue
-              'rgba(255, 99, 132, 0.8)', // Lazada - Pink/Red
-              'rgba(75, 192, 192, 0.8)', // Tiktok - Teal
-              'rgba(255, 206, 86, 0.8)', // Yellow
-              'rgba(153, 102, 255, 0.8)', // Purple
-              'rgba(255, 159, 64, 0.8)' // Orange
+              'rgba(54, 162, 235, 0.8)', 
+              'rgba(75, 192, 192, 0.8)', 
+              'rgba(255, 99, 132, 0.8)', 
+              'rgba(255, 206, 86, 0.8)', 
+              'rgba(153, 102, 255, 0.8)', 
+              'rgba(255, 159, 64, 0.8)' 
           ];
 
           backlogChartInstance = new Chart(backlogCtx, {
@@ -606,17 +606,17 @@ export default function Home() {
                                 </select>
                              </div>
                         </div>
-                        <div className="flex items-center gap-8 mb-4">
-                            <div className="flex items-center gap-2">
-                                <span id="chart-payment-accepted-value" className="text-2xl font-bold text-blue-500">0</span>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">Payment Accepted</span>
+                        <div className="grid grid-cols-2 gap-4 mb-4 text-center">
+                            <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Payment Accepted</p>
+                                <p id="chart-payment-accepted-value" className="text-2xl font-bold text-indigo-500">0</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span id="chart-marketplace-store-value" className="text-2xl font-bold text-blue-500">0</span>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">Marketplace Store</span>
+                            <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Marketplace Store</p>
+                                <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500">0</p>
                             </div>
                         </div>
-                        <div className="h-96 bg-gray-100 dark:bg-gray-700/50 rounded-md p-4">
+                        <div className="h-96 bg-gray-50 dark:bg-gray-800/50 rounded-md p-4">
                            <canvas id="backlog-chart"></canvas>
                         </div>
                       </div>
