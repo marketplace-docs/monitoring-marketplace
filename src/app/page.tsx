@@ -306,7 +306,13 @@ export default function Home() {
                 maintainAspectRatio: false,
                 scales: {
                     x: { grid: { display: false } },
-                    y: { beginAtZero: true, grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' } }
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' },
+                        ticks: {
+                            stepSize: 100
+                        }
+                    }
                 },
                 plugins: {
                     legend: { display: false },
