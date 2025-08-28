@@ -498,8 +498,29 @@ export default function Home() {
             updateDashboard();
         });
 
-        ['picker-input', 'packer-input', 'dispatcher-input', 
-         'pick-start-hour', 'pick-end-hour', 'pack-start-hour', 'pack-end-hour', 
+        const setupManpowerInput = (inputId: string, iconId: string) => {
+            const input = document.getElementById(inputId) as HTMLInputElement;
+            const icon = document.getElementById(iconId);
+            if (input && icon) {
+                input.readOnly = true; // Make it readonly by default
+                icon.addEventListener('click', () => {
+                    input.readOnly = false;
+                    input.focus();
+                });
+                input.addEventListener('blur', () => {
+                    input.readOnly = true;
+                    updateDashboard();
+                });
+                input.addEventListener('input', updateDashboard);
+            }
+        };
+
+        setupManpowerInput('picker-input', 'edit-picker');
+        setupManpowerInput('packer-input', 'edit-packer');
+        setupManpowerInput('dispatcher-input', 'edit-dispatcher');
+
+
+        ['pick-start-hour', 'pick-end-hour', 'pack-start-hour', 'pack-end-hour', 
          'shipped-start-hour', 'shipped-end-hour'].forEach(id => {
             const element = document.getElementById(id);
             if (element) {
@@ -638,11 +659,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Picker</p>
                             <div className="flex items-center gap-2">
                                 <User className="w-4 h-4 text-blue-500" />
-                                <Pencil className="w-3 h-3 text-gray-400" />
+                                <Pencil id="edit-picker" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                            <input type="number" id="picker-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                            <input type="number" id="picker-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
                              <span id="jumlah-picker-value" className="hidden">0</span>
                         </div>
                     </div>
@@ -651,11 +672,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Packer</p>
                              <div className="flex items-center gap-2">
                                 <Package className="w-4 h-4 text-green-500" />
-                                <Pencil className="w-3 h-3 text-gray-400" />
+                                <Pencil id="edit-packer" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                             <input type="number" id="packer-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                             <input type="number" id="packer-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
                              <span id="jumlah-packer-value" className="hidden">0</span>
                         </div>
                     </div>
@@ -664,11 +685,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Dispatcher</p>
                              <div className="flex items-center gap-2">
                                 <Truck className="w-4 h-4 text-blue-500" />
-                                <Pencil className="w-3 h-3 text-gray-400" />
+                                <Pencil id="edit-dispatcher" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
                             </div>
                         </div>
                          <div className="flex items-center gap-2 mt-1">
-                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
                             <span id="jumlah-dispatcher-value" className="hidden">0</span>
                         </div>
                     </div>
@@ -853,5 +874,3 @@ export default function Home() {
     </>
   );
 }
-
-    
