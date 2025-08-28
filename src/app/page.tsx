@@ -1,30 +1,36 @@
-"use client"
-import { useEffect } from 'react';
-import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2, ChevronsLeft, ChevronsRight, ArrowLeft, ArrowRight } from 'lucide-react';
+
+"use client";
+import { useEffect, useRef } from 'react';
+import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, UserCheck, PackagePlus, Truck, LineChart, BarChart3, Clock, Upload, Download } from 'lucide-react';
 
 export default function Home() {
+  const chartInstances = useRef<{ [key: string]: any }>({});
+
   useEffect(() => {
-    
-    // Inisialisasi state awal
+    // Pastikan Chart.js dan pluginnya tersedia di window
+    if (typeof window.Chart === 'undefined') {
+        console.error('Chart.js not loaded');
+        return;
+    }
+
+    const Chart = window.Chart;
+    const ChartDataLabels = window.ChartDataLabels;
+    if (ChartDataLabels) {
+      Chart.register(ChartDataLabels);
+    } else {
+        console.error('ChartDataLabels plugin not loaded');
+    }
+
     let pickData: number[] = [];
     let packData: number[] = [];
     let shippedData: number[] = [];
-    let originalPickData: number[] = [];
-    let originalPackData: number[] = [];
-    let originalShippedData: number[] = [];
     let backlogData: any[] = []; 
-    let summary: any = {};
-    let pickChartInstance: any;
-    let packChartInstance: any;
-    let shippedChartInstance: any;
-    let backlogChartInstance: any; 
-    let currentPage = 1;
-    let recordsPerPage = 5;
-    let isEditingBacklog = false;
+    let currentBacklogFilter = 'platform';
+    let currentBacklogDataMode = 'count';
 
     const generateHours = () => {
         const hours = [];
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i <= 24; i++) {
             hours.push(`${String(i).padStart(2, '0')}:00`);
         }
         return hours;
@@ -33,46 +39,29 @@ export default function Home() {
     const hours = generateHours();
 
     const initialBacklogData = [
-      { platform: "Shopee Jung Saem Mool", payment_order: "500", source: "Jung Saem Mool Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Amuse", payment_order: "240", source: "Amuse Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Carasun", payment_order: "300", source: "Carasun.id Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Ariul", payment_order: "120", source: "Ariul Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Dr G", payment_order: "450", source: "Dr G Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Im From", payment_order: "200", source: "Im From Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee COSRX", payment_order: "800", source: "COSRX Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Espoir", payment_order: "150", source: "Espoir Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Mediheal", payment_order: "250", source: "Mediheal Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Keana", payment_order: "100", source: "Keana Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Lilla Baby", payment_order: "50", source: "Lilla Baby Indonesia", marketplace_platform: "Shopee" },
-      { platform: "Shopee lilla", payment_order: "80", source: "Lilla Official store", marketplace_platform: "Shopee" },
-      { platform: "Shopee", payment_order: "1200", source: "Edit by Sociolla", marketplace_platform: "Shopee" },
-      { platform: "Shopee Round Lab", payment_order: "320", source: "Round Lab Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Speak to me", payment_order: "40", source: "Speak To Me Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Sukin", payment_order: "90", source: "Sukin Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Woshday", payment_order: "20", source: "Woshday Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Gemistry", payment_order: "60", source: "Gemistry Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Sungboon Editor", payment_order: "180", source: "Sungboon Editor Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee Derma Angel", payment_order: "110", source: "Derma Angel Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee UIQ", payment_order: "70", source: "UIQ Official Store", marketplace_platform: "Shopee" },
-      { platform: "Shopee UB Mom", payment_order: "30", source: "UB Mom Indonesia", marketplace_platform: "Shopee" },
-      { platform: "Shopee Bioheal", payment_order: "139", source: "Bioheal Official Store", marketplace_platform: "Shopee" },
-      { platform: "Lazada Cosrx", payment_order: "234", source: "COSRX Official Store", marketplace_platform: "Lazada" },
-      { platform: "tiktok_lilla", payment_order: "400", source: "Lilla Official store", marketplace_platform: "Tiktok" },
-      { platform: "tiktok_cosrx", payment_order: "550", source: "COSRX Official Store", marketplace_platform: "Tiktok" },
-      { platform: "tiktok_carasun", payment_order: "210", source: "Carasun.id Official Store", marketplace_platform: "Tiktok" },
-      { platform: "tiktok_derma_angel", payment_order: "80", source: "Derma Angel Official Store", marketplace_platform: "Tiktok" },
-      { platform: "tiktok_lilla_Baby", payment_order: "40", source: "Lilla Baby Indonesia", marketplace_platform: "Tiktok" },
-      { platform: "tiktok", payment_order: "300", source: "Edit by Sociolla", marketplace_platform: "Tiktok" },
-      { platform: "tiktok_roundlab", payment_order: "158", source: "Round Lab Official Store", marketplace_platform: "Tiktok" },
+      { platform: "Shopee", payment_order: "0", source: "Edit by Sociolla" },
+      { platform: "Shopee Amuse", payment_order: "0", source: "Amuse Official Store" },
+      { platform: "Shopee Ariul", payment_order: "0", source: "Ariul Official Store" },
+      { platform: "Shopee COSRX", payment_order: "0", source: "COSRX Official Store" },
+      { platform: "Shopee Derma Angel", payment_order: "0", source: "Derma Angel Official Store" },
+      { platform: "Shopee Dr G", payment_order: "0", source: "Dr G Official Store" },
+      { platform: "Shopee Espoir", payment_order: "0", source: "Espoir Official Store" },
+      { platform: "Shopee Jung Saem Mool", payment_order: "0", source: "Jung Saem Mool Official Store" },
+      { platform: "Shopee Lilla", payment_order: "0", source: "Lilla Official store" },
+      { platform: "Shopee Lilla Baby", payment_order: "0", source: "Lilla Baby Indonesia" },
+      { platform: "Shopee Mediheal", payment_order: "0", source: "Mediheal Official Store" },
+      { platform: "Shopee Round Lab", payment_order: "0", source: "Round Lab Official Store" },
+      { platform: "Shopee Speak to me", payment_order: "0", source: "Speak to me Official Store" },
+      { platform: "Shopee Sukin", payment_order: "0", source: "Sukin Official Store" },
+      { platform: "Shopee UB Mom", payment_order: "0", source: "UB Mom Indonesia" },
+      { platform: "Shopee UIQ", payment_order: "0", source: "UIQ Official Store" },
+      { platform: "tiktok_cosrx", payment_order: "0", source: "COSRX Official Store" },
+      { platform: "tiktok_derma_angel", payment_order: "0", source: "Derma Angel Official Store" },
     ];
-
 
     const showToast = (message: string, type: 'success' | 'error') => {
         const toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            console.error('Toast container not found.');
-            return;
-        }
+        if (!toastContainer) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.innerText = message;
@@ -85,60 +74,55 @@ export default function Home() {
     const exportCSV = (type: 'pick' | 'pack' | 'shipped') => {
         let data: number[], filename: string, headers: string[];
         if (type === 'pick') {
-            data = originalPickData;
+            data = pickData;
             filename = 'pick_data.csv';
             headers = ['Jam', 'Jumlah Order Picked'];
         } else if (type === 'pack') {
-            data = originalPackData;
+            data = packData;
             filename = 'pack_data.csv';
             headers = ['Jam', 'Jumlah Order Packed'];
         } else {
-            data = originalShippedData;
+            data = shippedData;
             filename = 'shipped_data.csv';
             headers = ['Jam', 'Jumlah Order Shipped'];
         }
 
         let csvContent = headers.join(',') + '\n';
         hours.forEach((hour, index) => {
-            csvContent += `${hour},${data[index]}\n`;
+            csvContent += `${hour},${data[index] || 0}\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
-    
-    (window as any).exportCSV = exportCSV;
 
     const uploadCSV = (type: 'pick' | 'pack' | 'shipped') => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.csv';
-        fileInput.style.display = 'none';
-
-        fileInput.addEventListener('change', (e: any) => {
-            const file = e.target.files[0];
+        fileInput.onchange = (e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
             if (!file) {
                 showToast('Upload dibatalkan', 'error');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = function(event: any) {
+            reader.onload = (event) => {
                 try {
-                    const csvData = event.target.result;
+                    const csvData = event.target?.result as string;
                     const lines = csvData.split('\n');
                     const newData = Array(hours.length).fill(0);
                     
-                    lines.slice(1).forEach((line: string) => {
+                    lines.slice(1).forEach(line => {
                         const parts = line.split(',');
                         if (parts.length === 2) {
                             const hour = parts[0].trim();
@@ -150,987 +134,595 @@ export default function Home() {
                         }
                     });
 
-                    if (type === 'pick') {
-                        originalPickData = [...newData];
-                        pickData = [...originalPickData];
-                    } else if (type === 'pack') {
-                        originalPackData = [...newData];
-                        packData = [...originalPackData];
-                    } else if (type === 'shipped') {
-                        originalShippedData = [...newData];
-                        shippedData = [...originalShippedData];
-                    }
+                    if (type === 'pick') pickData = [...newData];
+                    else if (type === 'pack') packData = [...newData];
+                    else if (type === 'shipped') shippedData = [...newData];
+                    
                     updateDashboard();
                     showToast('Upload CSV berhasil!', 'success');
                 } catch (error) {
                     showToast('Gagal memproses file CSV.', 'error');
-                    console.error('Error processing CSV:', error);
                 }
             };
-            reader.onerror = function() {
-                showToast('Gagal membaca file.', 'error');
-            };
             reader.readAsText(file);
-        });
-
-        document.body.appendChild(fileInput);
+        };
         fileInput.click();
-        document.body.removeChild(fileInput);
     };
-    (window as any).uploadCSV = uploadCSV;
-
 
     const exportBacklogCSV = () => {
         const filename = 'backlog_data.csv';
-        const headers = ['Marketplace Store', 'Store Name', 'Platform', 'Payment Order'];
+        const headers = ['Store Name', 'Payment Order', 'Marketplace Store'];
         let csvContent = headers.join(',') + '\n';
         backlogData.forEach(item => {
-            csvContent += `${item.source},${item.platform},${item.marketplace_platform},${item.payment_order}\n`;
+            csvContent += `"${item.platform}","${item.payment_order}","${item.source}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
-    (window as any).exportBacklogCSV = exportBacklogCSV;
 
     const uploadBacklogCSV = () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.csv';
-        fileInput.style.display = 'none';
-
-        fileInput.addEventListener('change', (e: any) => {
-            const file = e.target.files[0];
+        fileInput.onchange = (e) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
             if (!file) {
                 showToast('Upload dibatalkan', 'error');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = function(event: any) {
+            reader.onload = (event) => {
                 try {
-                    const csvData = event.target.result;
+                    const csvData = event.target?.result as string;
                     const lines = csvData.split('\n');
                     const newBacklogData: any[] = [];
                     
-                    lines.slice(1).forEach((line: string) => {
-                         const parts = line.split(',');
-                        if (parts.length >= 4) { 
+                    lines.slice(1).forEach(line => {
+                        const parts = line.split(',');
+                        if (parts.length >= 3) {
                             newBacklogData.push({
-                                source: parts[0].trim(),
-                                platform: parts[1].trim(),
-                                marketplace_platform: parts[2].trim(),
-                                payment_order: (parts[3].trim() && !isNaN(parseInt(parts[3].trim(), 10))) ? parts[3].trim() : "0", 
+                                platform: parts[0].trim().replace(/"/g, ''),
+                                payment_order: (parts[1].trim() && !isNaN(parseInt(parts[1].trim(), 10))) ? parts[1].trim() : "0", 
+                                source: parts[2].trim().replace(/"/g, ''),
                             });
                         }
                     });
                     backlogData = [...newBacklogData];
-                    currentPage = 1;
                     updateDashboard();
                     document.getElementById('backlog-content')?.classList.remove('hidden');
                     showToast('Upload CSV Backlog berhasil!', 'success');
                 } catch (error) {
                     showToast('Gagal memproses file CSV.', 'error');
-                    console.error('Error processing CSV:', error);
                 }
-            };
-            reader.onerror = function() {
-                showToast('Gagal membaca file.', 'error');
             };
             reader.readAsText(file);
-        });
-
-        document.body.appendChild(fileInput);
+        };
         fileInput.click();
-        document.body.removeChild(fileInput);
     };
+
+    (window as any).uploadCSV = uploadCSV;
+    (window as any).exportCSV = exportCSV;
     (window as any).uploadBacklogCSV = uploadBacklogCSV;
-    
+    (window as any).exportBacklogCSV = exportBacklogCSV;
+
     const updateSummary = () => {
-        const totalPickOrder = pickData.reduce((sum, value) => sum + (value || 0), 0);
-        const totalPackOrder = packData.reduce((sum, value) => sum + (value || 0), 0);
-        const totalShippedOrder = shippedData.reduce((sum, value) => sum + (value || 0), 0);
+        const totalPickOrder = pickData.reduce((a, b) => a + b, 0);
+        const totalPackOrder = packData.reduce((a, b) => a + b, 0);
+        const totalShippedOrder = shippedData.reduce((a, b) => a + b, 0);
         const paymentOrders = backlogData.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
+        const pickerCount = parseInt((document.getElementById('picker-input') as HTMLInputElement).value, 10) || 0;
+        const packerCount = parseInt((document.getElementById('packer-input') as HTMLInputElement).value, 10) || 0;
+        const dispatcherCount = parseInt((document.getElementById('dispatcher-input') as HTMLInputElement).value, 10) || 0;
+
+        const nonZeroPick = pickData.filter(v => v > 0).length || 1;
+        const nonZeroPack = packData.filter(v => v > 0).length || 1;
+        const nonZeroShipped = shippedData.filter(v => v > 0).length || 1;
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
-
-        const marketplaceStoreCount = new Set(backlogData.map(item => item.platform)).size;
         
-        summary = {
-            totalPickOrder,
-            totalPacked: totalPackOrder,
-            totalShipped: totalShippedOrder,
-            payment: paymentOrders,
-            inProgress: inProgressOrders,
-            marketplaceStoreCount,
-        };
+        const targetPick = 650;
+        const targetPack = 525;
+        const targetShipped = 515;
+
+        const performancePicker = pickerCount > 0 ? Math.min(100, ((totalPickOrder / pickerCount) / targetPick) * 100) : 0;
+        const performancePacker = packerCount > 0 ? Math.min(100, ((totalPackOrder / packerCount) / targetPack) * 100) : 0;
+        const performanceShipped = dispatcherCount > 0 ? Math.min(100, ((totalShippedOrder / dispatcherCount) / targetShipped) * 100) : 0;
+
+        const setText = (id: string, value: string | number) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = value.toLocaleString();
+        }
+
+        setText('total-pick-order', totalPickOrder);
+        setText('total-packed-orders', totalPackOrder);
+        setText('total-shipped-orders', totalShippedOrder);
+        setText('payment-accepted-count', paymentOrders);
+        setText('in-progress-orders', inProgressOrders);
         
-        const formatNumber = (num: number) => num.toLocaleString('en-US');
-
-        const setInnerText = (id: string, text: string) => {
-          const el = document.getElementById(id);
-          if (el) el.innerText = text;
-        }
-
-        setInnerText('total-pick-order', formatNumber(summary.totalPickOrder));
-        setInnerText('total-packed-orders', formatNumber(summary.totalPacked));
-        setInnerText('total-shipped-orders', formatNumber(summary.totalShipped));
-        setInnerText('payment-accepted-count', formatNumber(summary.payment));
-        setInnerText('in-progress-orders', formatNumber(summary.inProgress));
-
-        setInnerText('summary-pick-total', formatNumber(summary.totalPickOrder));
-        setInnerText('summary-pack-total', formatNumber(summary.totalPacked));
-        setInnerText('summary-ship-total', formatNumber(summary.totalShipped));
-        setInnerText('backlog-total', formatNumber(summary.payment));
-        setInnerText('chart-payment-accepted-value', formatNumber(summary.payment));
-        setInnerText('chart-marketplace-store-value', summary.marketplaceStoreCount.toString());
-    };
-
-    const renderSummaryChart = async (type: 'pick' | 'pack' | 'shipped') => {
-        const Chart = (await import('chart.js/auto')).default;
-        let chartInstance: any, ctx: HTMLCanvasElement | null, data: number[], label: string, borderColor: string, chartVar: 'pickChartInstance' | 'packChartInstance' | 'shippedChartInstance';
-
-        if (type === 'pick') {
-            chartInstance = pickChartInstance;
-            chartVar = 'pickChartInstance';
-            ctx = document.getElementById('summary-pick-chart') as HTMLCanvasElement;
-            data = pickData;
-            label = 'Jumlah Order Pick';
-            borderColor = '#EF4444';
-        } else if (type === 'pack') {
-            chartInstance = packChartInstance;
-            chartVar = 'packChartInstance';
-            ctx = document.getElementById('summary-pack-chart') as HTMLCanvasElement;
-            data = packData;
-            label = 'Jumlah Order Pack';
-            borderColor = '#F97316';
-        } else { // shipped
-            chartInstance = shippedChartInstance;
-            chartVar = 'shippedChartInstance';
-            ctx = document.getElementById('summary-ship-chart') as HTMLCanvasElement;
-            data = shippedData;
-            label = 'Jumlah Order Ship';
-            borderColor = '#A855F7';
-        }
-
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-
-        if (ctx) {
-            const newChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: hours,
-                    datasets: [{
-                        label: label,
-                        data: data,
-                        borderColor: borderColor,
-                        backgroundColor: 'transparent',
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointBackgroundColor: borderColor,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false }
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-            if (chartVar === 'pickChartInstance') pickChartInstance = newChartInstance;
-            else if (chartVar === 'packChartInstance') packChartInstance = newChartInstance;
-            else shippedChartInstance = newChartInstance;
-        }
-    };
-
-    const renderCharts = async () => {
-        renderSummaryChart('pick');
-        renderSummaryChart('pack');
-        renderSummaryChart('shipped');
+        setText('average-pick-per-hour', Math.round(totalPickOrder / nonZeroPick));
+        setText('average-pack-per-hour', Math.round(totalPackOrder / nonZeroPack));
+        setText('average-shipped-per-hour', Math.round(totalShippedOrder / nonZeroShipped));
         
-        const Chart = (await import('chart.js/auto')).default;
-        const ChartDataLabels = (await import('chartjs-plugin-datalabels')).default;
-        Chart.register(ChartDataLabels);
+        setText('performance-picker-percentage', `${performancePicker.toFixed(2)}%`);
+        setText('performance-packer-percentage', `${performancePacker.toFixed(2)}%`);
+        setText('performance-shipped-percentage', `${performanceShipped.toFixed(2)}%`);
 
-        const backlogCtx = document.getElementById('backlog-chart') as HTMLCanvasElement;
-        
-        if (backlogChartInstance) {
-            backlogChartInstance.destroy();
-        }
-
-        if (backlogCtx) {
-          const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
-          const filterValue = filterSelect ? filterSelect.value : 'platform';
-          
-          const groupedData: { [key: string]: number } = {};
-
-          backlogData.forEach(item => {
-            let key;
-            if (filterValue === 'marketplace_platform') {
-              key = item.marketplace_platform;
-            } else {
-              key = item[filterValue];
-            }
-             if (filterValue === 'marketplace_platform') {
-                if (key.toLowerCase().includes('shopee')) key = 'Shopee';
-                if (key.toLowerCase().includes('tiktok')) key = 'Tiktok';
-                if (key.toLowerCase().includes('lazada')) key = 'Lazada';
-            }
+        const updatePerfCard = (elementId: string, percentage: number) => {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.classList.remove('bg-green-100', 'text-green-800', 'bg-yellow-100', 'text-yellow-800', 'bg-red-100', 'text-red-800', 'bg-gray-100', 'text-gray-800');
+            el.classList.remove('dark:bg-green-900/50', 'dark:text-green-300', 'dark:bg-yellow-900/50', 'dark:text-yellow-300', 'dark:bg-red-900/50', 'dark:text-red-300', 'dark:bg-gray-700', 'dark:text-gray-300');
             
-            const payment = parseInt(item.payment_order, 10) || 0;
-            if (groupedData[key]) {
-              groupedData[key] += payment
+            if (percentage >= 100) {
+                el.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/50', 'dark:text-green-300');
+            } else if (percentage >= 90) {
+                el.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-900/50', 'dark:text-yellow-300');
+            } else if (percentage > 0) {
+                el.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/50', 'dark:text-red-300');
             } else {
-              groupedData[key] = payment;
+                el.classList.add('bg-gray-100', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-300');
             }
-          });
+        };
 
-          const labels = Object.keys(groupedData);
-          const data = Object.values(groupedData);
-          const maxDataValue = Math.max(...data);
-          const isDarkMode = document.documentElement.classList.contains('dark');
+        updatePerfCard('card-performance-picker', performancePicker);
+        updatePerfCard('card-performance-packer', performancePacker);
+        updatePerfCard('card-performance-shipped', performanceShipped);
+    };
 
-          const chartColors = [
-              'rgba(59, 130, 246, 0.8)', 
-              'rgba(239, 68, 68, 0.8)',
-              'rgba(34, 197, 94, 0.8)', 
-              'rgba(249, 115, 22, 0.8)', 
-              'rgba(168, 85, 247, 0.8)', 
-              'rgba(234, 179, 8, 0.8)'
-          ];
-          
-          backlogChartInstance = new Chart(backlogCtx, {
-            type: 'bar',
+    const renderChart = (canvasId: string, chartType: 'bar' | 'line', labels: string[], data: number[], label: string, color: string) => {
+        const ctx = document.getElementById(canvasId) as HTMLCanvasElement;
+        if (!ctx) return;
+
+        if (chartInstances.current[canvasId]) {
+            chartInstances.current[canvasId].destroy();
+        }
+
+        chartInstances.current[canvasId] = new Chart(ctx, {
+            type: chartType,
             data: {
-              labels: labels,
-              datasets: [{
-                label: 'Payment Accepted',
-                data: data,
-                backgroundColor: chartColors,
-                borderColor: chartColors.map(color => color.replace('0.8', '1')),
-                borderWidth: 1,
-                borderRadius: 5,
-              }]
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: color,
+                    borderColor: color,
+                    borderRadius: chartType === 'bar' ? 5 : undefined,
+                    borderWidth: 1,
+                    tension: 0.4,
+                    fill: false,
+                }]
             },
             options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' } }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('en-US').format(context.parsed.y);
-                            }
-                            return label;
-                        }
-                    }
-                },
-                datalabels: {
-                    color: isDarkMode ? '#FFFFFF' : '#000000',
-                    anchor: 'end',
-                    align: 'top',
-                    font: {
-                        weight: 'bold'
-                    },
-                    formatter: (value) => {
-                       return new Intl.NumberFormat('en-US').format(value);
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value > 0 ? value : null,
+                        color: document.body.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                        font: { weight: 'bold' }
                     }
                 }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: '#E5E7EB'
-                  },
-                  ticks: {
-                    color: '#3B82F6',
-                    callback: function(value) {
-                        return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(Number(value));
-                    }
-                  },
-                  max: maxDataValue * 1.2
-                },
-                 x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                       color: '#3B82F6',
-                    }
-                 }
-              }
             }
-          });
-        }
+        });
     };
     
-    const renderHourlyInputs = (type: 'pick' | 'pack' | 'shipped') => {
-        const container = document.getElementById(`${type}-hourly-inputs`);
-        if (!container) return;
+    const renderAllCharts = () => {
+        const startPickHour = parseInt((document.getElementById('pick-start-hour') as HTMLInputElement).value, 10);
+        const endPickHour = parseInt((document.getElementById('pick-end-hour') as HTMLInputElement).value, 10);
+        const filteredPickHours = hours.slice(startPickHour, endPickHour + 1);
+        const filteredPickData = pickData.slice(startPickHour, endPickHour + 1);
+        renderChart('pick-chart', 'bar', filteredPickHours, filteredPickData, 'Total Picked', '#4f46e5');
 
-        container.innerHTML = '';
-        const data = type === 'pick' ? pickData : (type === 'pack' ? packData : shippedData);
+        const startPackHour = parseInt((document.getElementById('pack-start-hour') as HTMLInputElement).value, 10);
+        const endPackHour = parseInt((document.getElementById('pack-end-hour') as HTMLInputElement).value, 10);
+        const filteredPackHours = hours.slice(startPackHour, endPackHour + 1);
+        const filteredPackData = packData.slice(startPackHour, endPackHour + 1);
+        renderChart('pack-chart', 'bar', filteredPackHours, filteredPackData, 'Total Packed', '#f59e0b');
+        
+        const startShippedHour = parseInt((document.getElementById('shipped-start-hour') as HTMLInputElement).value, 10);
+        const endShippedHour = parseInt((document.getElementById('shipped-end-hour') as HTMLInputElement).value, 10);
+        const filteredShippedHours = hours.slice(startShippedHour, endShippedHour + 1);
+        const filteredShippedData = shippedData.slice(startShippedHour, endShippedHour + 1);
+        renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#10b981');
 
-        hours.forEach((hour, index) => {
-            const inputGroup = document.createElement('div');
-            inputGroup.className = 'flex flex-col items-center space-y-1';
-            inputGroup.innerHTML = `
-                <span class="text-xs text-gray-500">${hour}</span>
-                <input type="number" value="${data[index]}" data-index="${index}" class="w-16 p-1 text-center border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-            `;
-            container.appendChild(inputGroup);
-        });
-
-        container.querySelectorAll('input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const target = e.target as HTMLInputElement;
-                const index = parseInt(target.dataset.index || '0');
-                const value = parseInt(target.value, 10) || 0;
-                if (type === 'pick') {
-                    pickData[index] = value;
-                    originalPickData[index] = value;
-                } else if (type === 'pack') {
-                    packData[index] = value;
-                    originalPackData[index] = value;
-                } else {
-                    shippedData[index] = value;
-                    originalShippedData[index] = value;
-                }
-                updateDashboard();
-            });
-        });
+        // Backlog Chart
+        const dataToFilter = currentBacklogFilter === 'platform' ? 'platform' : 'source';
+        const groupedData = backlogData.reduce((acc, item) => {
+            const key = item[dataToFilter];
+            const normalizedKey = key.toLowerCase().startsWith('shopee') ? 'Shopee' : (key.toLowerCase().startsWith('tiktok') ? 'Tiktok' : key);
+            
+            if (currentBacklogDataMode === 'count') {
+                acc[normalizedKey] = (acc[normalizedKey] || 0) + 1;
+            } else {
+                acc[normalizedKey] = (acc[normalizedKey] || 0) + (parseInt(item.payment_order, 10) || 0);
+            }
+            return acc;
+        }, {});
+        
+        const backlogLabels = Object.keys(groupedData);
+        const backlogValues = Object.values(groupedData) as number[];
+        const chartLabel = currentBacklogDataMode === 'count' ? 'Count of Stores' : 'Total Payment Orders';
+        document.getElementById('backlog-chart-title')!.innerText = `Grafik Backlog per ${currentBacklogFilter === 'platform' ? 'Store Name' : 'Marketplace'}`;
+        renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, '#34d399');
     };
 
     const updateDashboard = () => {
+        updateInputFieldsValues();
         updateSummary();
         renderBacklogTable();
-        renderCharts();
-        renderHourlyInputs('pick');
-        renderHourlyInputs('pack');
-        renderHourlyInputs('shipped');
+        renderAllCharts();
+    };
+
+    const createInputFields = () => {
+        const create = (containerId: string, className: string, dataType: 'pick' | 'pack' | 'shipped') => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            hours.forEach((hour, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex-none w-24 text-center';
+                div.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">${hour}</label>
+                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" value="0" min="0">
+                `;
+                container.appendChild(div);
+            });
+            container.querySelectorAll(`.${className}`).forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const index = parseInt((e.target as HTMLInputElement).dataset.index!, 10);
+                    const value = parseInt((e.target as HTMLInputElement).value, 10) || 0;
+                    if (dataType === 'pick') pickData[index] = value;
+                    else if (dataType === 'pack') packData[index] = value;
+                    else if (dataType === 'shipped') shippedData[index] = value;
+                    updateDashboard();
+                });
+            });
+        };
+        create('pick-input-container', 'pick-input', 'pick');
+        create('pack-input-container', 'pack-input', 'pack');
+        create('shipped-input-container', 'shipped-input', 'shipped');
+    };
+
+    const updateInputFieldsValues = () => {
+        const update = (className: string, data: number[]) => {
+            document.querySelectorAll(`.${className}`).forEach((input, index) => {
+                (input as HTMLInputElement).value = (data[index] || 0).toString();
+            });
+        };
+        update('pick-input', pickData);
+        update('pack-input', packData);
+        update('shipped-input', shippedData);
     };
     
     const renderBacklogTable = () => {
         const tableBody = document.getElementById('backlog-table-body');
-        const editButton = document.getElementById('edit-backlog-btn');
-        if (!tableBody || !editButton) return;
-
-        if (isEditingBacklog) {
-            editButton.textContent = 'Save';
-        } else {
-            editButton.textContent = 'Edit';
-        }
-
+        if (!tableBody) return;
         tableBody.innerHTML = '';
-        const startIndex = (currentPage - 1) * recordsPerPage;
-        const endIndex = startIndex + recordsPerPage;
-        const paginatedData = backlogData.slice(startIndex, endIndex);
-
-        paginatedData.forEach((item, index) => {
-            const globalIndex = startIndex + index;
+        backlogData.forEach(item => {
             const row = document.createElement('tr');
-            if (isEditingBacklog) {
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.source}" data-index="${globalIndex}" data-field="source" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.platform}" data-index="${globalIndex}" data-field="platform" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.marketplace_platform}" data-index="${globalIndex}" data-field="marketplace_platform" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><input type="number" value="${item.payment_order}" data-index="${globalIndex}" data-field="payment_order" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
-                `;
-            } else {
-                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.marketplace_platform}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${(parseInt(item.payment_order, 10) || 0).toLocaleString('en-US')}</td>
-                `;
-            }
+            row.className = 'dark:border-gray-700';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${parseInt(item.payment_order, 10).toLocaleString()}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
+            `;
             tableBody.appendChild(row);
         });
-        updatePaginationControls();
     };
+    
+    const setupCollapsible = () => {
+        document.querySelectorAll('[data-collapsible-trigger]').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const contentId = trigger.getAttribute('data-collapsible-trigger');
+                const content = document.getElementById(contentId!);
+                const icon = trigger.querySelector('.lucide-chevron-down');
 
-    const toggleEditBacklog = () => {
-        isEditingBacklog = !isEditingBacklog;
-        if (!isEditingBacklog) {
-            // Save logic
-            const inputs = document.querySelectorAll('#backlog-table-body input');
-            inputs.forEach(input => {
-                const htmlInput = input as HTMLInputElement;
-                const index = parseInt(htmlInput.dataset.index || '0', 10);
-                const field = htmlInput.dataset.field as keyof typeof backlogData[0];
-                if (backlogData[index] && field) {
-                    (backlogData[index] as any)[field] = htmlInput.value;
+                if (content && icon) {
+                    const isHidden = content.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180', !isHidden);
                 }
             });
+        });
+    };
+
+    const setupEventListeners = () => {
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             updateDashboard();
-            showToast('Backlog data saved!', 'success');
-        }
-        renderBacklogTable();
-    };
+        });
 
-    const makeEditable = (id: string, onSave: (value: string) => void) => {
-        const element = document.getElementById(id);
-        const parent = element?.parentElement;
-        if (!element || !parent) return;
+        ['picker-input', 'packer-input', 'dispatcher-input', 
+         'pick-start-hour', 'pick-end-hour', 'pack-start-hour', 'pack-end-hour', 
+         'shipped-start-hour', 'shipped-end-hour'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updateDashboard);
+        });
 
-        const currentValue = element.innerText;
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.value = currentValue.replace(/,/g, '');
-        input.className = 'text-2xl font-bold mt-2 bg-gray-200 dark:bg-gray-600 rounded w-full';
-
-        const saveButton = document.createElement('button');
-        saveButton.innerText = 'Save';
-        saveButton.className = 'ml-2 px-2 py-1 bg-green-500 text-white rounded text-sm';
-        
-        const container = document.createElement('div');
-        container.className = 'flex items-center';
-        container.appendChild(input);
-        container.appendChild(saveButton);
-
-        parent.replaceChild(container, element);
-        input.focus();
-
-        const save = () => {
-            onSave(input.value);
-            parent.replaceChild(element, container);
-            element.innerText = parseInt(input.value, 10).toLocaleString('en-US');
+        const setupFilterButton = (buttonId: string, filterType: 'platform' | 'source', otherButtonId: string) => {
+            document.getElementById(buttonId)?.addEventListener('click', () => {
+                currentBacklogFilter = filterType;
+                updateDashboard();
+                document.getElementById(buttonId)?.classList.replace('bg-gray-200', 'bg-indigo-600');
+                document.getElementById(buttonId)?.classList.replace('dark:bg-gray-700', 'dark:bg-indigo-500');
+                document.getElementById(buttonId)?.classList.add('text-white');
+                document.getElementById(otherButtonId)?.classList.replace('bg-indigo-600', 'bg-gray-200');
+                document.getElementById(otherButtonId)?.classList.replace('dark:bg-indigo-500', 'dark:bg-gray-700');
+                document.getElementById(otherButtonId)?.classList.remove('text-white');
+            });
         };
+        setupFilterButton('filter-platform', 'platform', 'filter-source');
+        setupFilterButton('filter-source', 'source', 'filter-platform');
 
-        saveButton.addEventListener('click', save);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') save();
-        });
-        input.addEventListener('blur', () => {
-            // Use timeout to allow save button click
-            setTimeout(() => {
-                if (document.body.contains(container)) {
-                     parent.replaceChild(element, container);
-                }
-            }, 200);
-        });
-    };
-    
-    const updatePaginationControls = () => {
-      const pageInfo = document.getElementById('page-info');
-      const totalRecords = backlogData.length;
-      const totalPages = Math.ceil(totalRecords / recordsPerPage);
-
-      const startRecord = (currentPage - 1) * recordsPerPage + 1;
-      const endRecord = Math.min(currentPage * recordsPerPage, totalRecords);
-
-      if (pageInfo) {
-          pageInfo.innerText = `${startRecord}-${endRecord} of ${totalRecords}`;
-      }
-
-      (document.getElementById('first-page') as HTMLButtonElement).disabled = currentPage === 1;
-      (document.getElementById('prev-page') as HTMLButtonElement).disabled = currentPage === 1;
-      (document.getElementById('next-page') as HTMLButtonElement).disabled = currentPage === totalPages;
-      (document.getElementById('last-page') as HTMLButtonElement).disabled = currentPage === totalPages;
-    }
-
-    const changePage = (page: number) => {
-        const totalRecords = backlogData.length;
-        const totalPages = Math.ceil(totalRecords / recordsPerPage);
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
-        currentPage = page;
-        renderBacklogTable();
-    }
-    
-    const theme = localStorage.getItem('theme');
-    if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-    }
-
-    originalPickData = hours.map(() => 0);
-    originalPackData = hours.map(() => 0);
-    originalShippedData = hours.map(() => 0);
-    pickData = [...originalPickData];
-    packData = [...originalPackData];
-    shippedData = [...originalShippedData];
-    
-    backlogData = [...initialBacklogData];
-    
-    updateDashboard();
-        
-    const setupCollapsible = (headerId: string, contentId: string, chevronId?: string) => {
-        const header = document.getElementById(headerId);
-        const icon = chevronId ? document.getElementById(chevronId) : header?.querySelector('.chevron-icon');
-        const content = document.getElementById(contentId);
-        
-        header?.addEventListener('click', (e) => {
-            if ((e.target as HTMLElement).closest('button, a, select')) {
-                return;
-            }
-            const isHidden = content?.classList.toggle('hidden');
-            if (icon) {
-                icon.classList.toggle('rotate-90', !isHidden);
-            }
-        });
+        const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment', otherButtonId: string) => {
+            document.getElementById(buttonId)?.addEventListener('click', () => {
+                currentBacklogDataMode = dataMode;
+                updateDashboard();
+                document.getElementById(buttonId)?.classList.replace('bg-gray-200', 'bg-indigo-600');
+                document.getElementById(buttonId)?.classList.replace('dark:bg-gray-700', 'dark:bg-indigo-500');
+                document.getElementById(buttonId)?.classList.add('text-white');
+                document.getElementById(otherButtonId)?.classList.replace('bg-indigo-600', 'bg-gray-200');
+                document.getElementById(otherButtonId)?.classList.replace('dark:bg-indigo-500', 'dark:bg-gray-700');
+                document.getElementById(otherButtonId)?.classList.remove('text-white');
+            });
+        };
+        setupDataModeButton('chart-data-count', 'count', 'chart-data-payment');
+        setupDataModeButton('chart-data-payment', 'payment', 'chart-data-count');
     };
 
-    setupCollapsible('marketplace-performance-header', 'marketplace-performance-content');
-    setupCollapsible('backlog-header', 'backlog-content');
-    setupCollapsible('summary-pick-header', 'summary-pick-content');
-    setupCollapsible('summary-pack-header', 'summary-pack-content');
-    setupCollapsible('summary-ship-header', 'summary-ship-content');
+    // Initial setup
+    const init = () => {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        pickData = Array(hours.length).fill(0);
+        packData = Array(hours.length).fill(0);
+        shippedData = Array(hours.length).fill(0);
+        backlogData = [...initialBacklogData];
 
-    document.getElementById('theme-toggle')?.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        document.body.classList.toggle('dark');
-        const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        localStorage.setItem('theme', currentTheme);
-        renderCharts();
-    });
+        createInputFields();
+        setupCollapsible();
+        setupEventListeners();
+        updateDashboard();
+    };
 
-    const backlogFilter = document.getElementById('backlog-filter');
-    if (backlogFilter) {
-      backlogFilter.addEventListener('change', renderCharts);
-    }
-    
-    document.getElementById('records-per-page')?.addEventListener('change', (e) => {
-      recordsPerPage = parseInt((e.target as HTMLSelectElement).value, 10);
-      currentPage = 1;
-      renderBacklogTable();
-    });
+    init();
 
-    document.getElementById('first-page')?.addEventListener('click', () => changePage(1));
-    document.getElementById('prev-page')?.addEventListener('click', () => changePage(currentPage - 1));
-    document.getElementById('next-page')?.addEventListener('click', () => changePage(currentPage + 1));
-    document.getElementById('last-page')?.addEventListener('click', () => {
-      const totalRecords = backlogData.length;
-      const totalPages = Math.ceil(totalRecords / recordsPerPage);
-      changePage(totalPages);
-    });
-
-    document.getElementById('edit-backlog-btn')?.addEventListener('click', toggleEditBacklog);
-
-    document.getElementById('edit-picker-btn')?.addEventListener('click', () => {
-        makeEditable('jumlah-picker', (value) => {
-            // Here you would normally save the value to a backend
-            console.log('Picker count saved:', value);
-            showToast('Jumlah picker disimpan!', 'success');
-        });
-    });
-
-    document.getElementById('edit-packer-btn')?.addEventListener('click', () => {
-        makeEditable('jumlah-packer', (value) => {
-            console.log('Packer count saved:', value);
-            showToast('Jumlah packer disimpan!', 'success');
-        });
-    });
-
-    document.getElementById('edit-dispatcher-btn')?.addEventListener('click', () => {
-        makeEditable('jumlah-dispatcher', (value) => {
-            console.log('Dispatcher count saved:', value);
-            showToast('Jumlah dispatcher disimpan!', 'success');
-        });
-    });
+    return () => {
+      // Cleanup charts on component unmount
+      Object.values(chartInstances.current).forEach(chart => chart.destroy());
+    };
 
   }, []);
 
   return (
     <>
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 lg:p-8">
-        <div id="app" className="w-full max-w-7xl mx-auto space-y-6">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div id="app" className="w-full max-w-screen-2xl mx-auto space-y-6 p-4 sm:p-6">
             
             <header className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <ShoppingCart className="w-8 h-8 text-indigo-500" />
-                    <h1 className="text-2xl font-bold">
-                        Fulfillment Marketplace
+                <div className="flex items-center gap-4">
+                    <div className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-lg">
+                       <ShoppingCart className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+                        Marketplace Dashboard
                     </h1>
                 </div>
-                <button id="theme-toggle" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
-                    <Sun className="h-6 w-6 hidden dark:block" />
-                    <Moon className="h-6 w-6 block dark:hidden" />
+                <button id="theme-toggle" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <Sun className="h-6 w-6 hidden dark:block text-yellow-400" />
+                    <Moon className="h-6 w-6 block dark:hidden text-gray-700" />
                 </button>
             </header>
 
-             <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    From <span className="font-medium text-green-500">payment</span> to progress — only cleared orders move forward to <span className="font-medium text-red-500">pick</span>, <span className="font-medium text-orange-500">pack</span>, and <span className="font-medium text-purple-500">ship</span>.
-                </p>
+            <div className="px-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400">From payment to progress — only cleared orders move forward to pick, pack, and ship.</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-red-500 text-white p-4 rounded-lg shadow-md flex flex-col justify-between">
-                    <p className="text-sm font-medium">Total Pick Order</p>
-                    <div className="flex items-end justify-between">
-                        <p className="text-3xl font-semibold" id="total-pick-order">0</p>
-                        <Boxes className="w-8 h-8 opacity-70" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
+                    <p className="text-sm font-medium opacity-90">Total Pick Order</p>
+                    <div className="flex items-end justify-between mt-2">
+                        <p className="text-4xl font-bold" id="total-pick-order">0</p>
+                        <Boxes className="w-8 h-8 opacity-50" />
                     </div>
                 </div>
-                <div className="bg-orange-500 text-white p-4 rounded-lg shadow-md flex flex-col justify-between">
-                    <p className="text-sm font-medium">Total Packed Order</p>
-                    <div className="flex items-end justify-between">
-                        <p className="text-3xl font-semibold" id="total-packed-orders">0</p>
-                         <PackageCheck className="w-8 h-8 opacity-70" />
+                <div className="bg-gradient-to-br from-orange-400 to-yellow-500 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
+                    <p className="text-sm font-medium opacity-90">Total Packed Order</p>
+                    <div className="flex items-end justify-between mt-2">
+                        <p className="text-4xl font-bold" id="total-packed-orders">0</p>
+                        <PackageCheck className="w-8 h-8 opacity-50" />
                     </div>
                 </div>
-                <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md flex flex-col justify-between">
-                    <p className="text-sm font-medium">Total Shipped Order</p>
-                    <div className="flex items-end justify-between">
-                        <p className="text-3xl font-semibold" id="total-shipped-orders">0</p>
-                        <SendHorizonal className="w-8 h-8 opacity-70" />
+                <div className="bg-gradient-to-br from-teal-400 to-emerald-500 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
+                    <p className="text-sm font-medium opacity-90">Total Shipped Order</p>
+                    <div className="flex items-end justify-between mt-2">
+                        <p className="text-4xl font-bold" id="total-shipped-orders">0</p>
+                        <SendHorizonal className="w-8 h-8 opacity-50" />
                     </div>
                 </div>
-                <div className="bg-green-500 text-white p-4 rounded-lg shadow-md flex flex-col justify-between">
-                    <p className="text-sm font-medium">Payment Accepted</p>
-                    <div className="flex items-end justify-between">
-                        <p className="text-3xl font-semibold" id="payment-accepted-count">0</p>
-                        <Coins className="w-8 h-8 opacity-70" />
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Payment Accepted</p>
+                    <div className="flex items-end justify-between mt-2">
+                        <p className="text-4xl font-bold text-gray-800 dark:text-gray-100" id="payment-accepted-count">0</p>
+                        <Coins className="w-8 h-8 text-amber-500 opacity-70" />
                     </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col justify-between">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">In Progress</p>
-                    <div className="flex items-end justify-between">
-                        <p className="text-3xl font-semibold" id="in-progress-orders">0</p>
-                        <Hourglass className="w-8 h-8 text-blue-500 opacity-80" />
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">In Progress</p>
+                     <div className="flex items-end justify-between mt-2">
+                        <p className="text-4xl font-bold text-gray-800 dark:text-gray-100" id="in-progress-orders">0</p>
+                        <Hourglass className="w-8 h-8 text-blue-500 opacity-70" />
+                    </div>
+                </div>
+            </div>
+                
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="performance-content">
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Performance Manpower</h2>
+                    <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
+                </div>
+                <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4 hidden">
+                    {[
+                      {id: 'picker', label: 'Jumlah Picker', icon: UserCheck},
+                      {id: 'packer', label: 'Jumlah Packer', icon: PackagePlus},
+                      {id: 'dispatcher', label: 'Jumlah Dispatcher', icon: Truck},
+                    ].map(item => (
+                      <div key={item.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{item.label}</p>
+                          <div className="flex items-center gap-4 mt-2">
+                              <item.icon className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                              <input type="number" id={`${item.id}-input`} defaultValue="0" className="text-2xl font-bold bg-transparent w-full focus:outline-none text-gray-800 dark:text-gray-100" min="0" />
+                          </div>
+                      </div>
+                    ))}
+                     {[
+                        {id: 'picker', label: 'Performance Picker', icon: LineChart},
+                        {id: 'packer', label: 'Performance Packer', icon: LineChart},
+                        {id: 'shipped', label: 'Performance Dispatcher', icon: LineChart},
+                    ].map(item => (
+                        <div key={item.id} id={`card-performance-${item.id}`} className="p-4 rounded-lg flex justify-between items-center transition-colors duration-300">
+                           <div>
+                                <p className="text-sm font-medium">{item.label}</p>
+                                <p className="text-2xl font-bold mt-1" id={`performance-${item.id}-percentage`}>0%</p>
+                           </div>
+                           <item.icon className="w-7 h-7 opacity-70" />
+                        </div>
+                    ))}
+                    {[
+                        {id: 'pick', label: 'Average Pick / Hour', icon: BarChart3},
+                        {id: 'pack', label: 'Average Pack / Hour', icon: Clock},
+                        {id: 'shipped', label: 'Average Shipped / Hour', icon: Truck},
+                    ].map(item => (
+                        <div key={item.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{item.label}</p>
+                                <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-gray-100" id={`average-${item.id}-per-hour`}>0</p>
+                            </div>
+                            <item.icon className={`w-7 h-7 text-${item.id === 'pick' ? 'purple' : item.id === 'pack' ? 'red' : 'orange'}-500 opacity-70`} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="backlog-content">
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Backlog Marketplace</h2>
+                     <div className="flex items-center gap-2">
+                        <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                            <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                        </button>
+                        <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                            <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                        </button>
+                        <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                    </div>
+                </div>
+                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4 hidden">
+                    <div className="lg:col-span-3 overflow-x-auto">
+                        <table className="min-w-full">
+                            <thead className="border-b border-gray-200 dark:border-gray-700">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Store Name</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div className="lg:col-span-2">
+                        <h3 id="backlog-chart-title" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            <div className="flex rounded-md shadow-sm">
+                               <button id="filter-platform" className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-l-md hover:bg-indigo-700 transition-colors">Store</button>
+                               <button id="filter-source" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Marketplace</button>
+                            </div>
+                             <div className="flex rounded-md shadow-sm">
+                               <button id="chart-data-count" className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
+                               <button id="chart-data-payment" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
+                            </div>
+                        </div>
+                        <div className="h-80 mt-4">
+                            <canvas id="backlog-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div className="space-y-3">
-                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div id="marketplace-performance-header" className="flex justify-between items-center p-4 cursor-pointer">
-                        <h2 className="text-lg font-semibold">Marketplace Performance</h2>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
-                    </div>
-                    <div id="marketplace-performance-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                          <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Picker</p>
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-blue-500" />
-                                <button id="edit-picker-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
-                            </div>
-                          </div>
-                          <p id="jumlah-picker" className="text-2xl font-bold mt-2">0</p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-between items-start">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Packer</p>
-                                <div className="flex items-center gap-2">
-                                    <PackageCheck className="w-4 h-4 text-green-500" />
-                                    <button id="edit-packer-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
-                                </div>
-                            </div>
-                            <p id="jumlah-packer" className="text-2xl font-bold mt-2">0</p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-between items-start">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Dispatcher</p>
-                                <div className="flex items-center gap-2">
-                                    <SendHorizonal className="w-4 h-4 text-purple-500" />
-                                    <button id="edit-dispatcher-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
-                                </div>
-                            </div>
-                            <p id="jumlah-dispatcher" className="text-2xl font-bold mt-2">0</p>
-                        </div>
-                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Picker</p>
-                                <p id="performance-picker" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
-                            </div>
-                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                        </div>
-                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Packer</p>
-                                <p id="performance-packer" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
-                            </div>
-                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                        </div>
-                        <div className="bg-slate-200 dark:bg-slate-700 p-4 rounded-lg flex justify-between items-center">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">Performance Dispatcher</p>
-                                <p id="performance-dispatcher" className="text-2xl font-bold text-gray-800 dark:text-white">0.00%</p>
-                            </div>
-                            <BarChart3 className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Pick / Hour</p>
-                                <p id="avg-pick-hour" className="text-2xl font-bold">0</p>
-                            </div>
-                            <BarChart3 className="w-6 h-6 text-purple-500" />
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Pack / Hour</p>
-                                <p id="avg-pack-hour" className="text-2xl font-bold">0</p>
-                            </div>
-                            <Clock className="w-6 h-6 text-red-500" />
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-end">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Average Shipped / Hour</p>
-                                <p id="avg-shipped-hour" className="text-2xl font-bold">0</p>
-                            </div>
-                            <Truck className="w-6 h-6 text-orange-500" />
-                        </div>
-                      </div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
+            {[
+                {id: 'pick', title: 'Summary Pick', color: 'indigo'},
+                {id: 'pack', title: 'Summary Pack', color: 'yellow'},
+                {id: 'shipped', title: 'Summary Ship', color: 'emerald'},
+            ].map(sec => (
+                <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
                         <div className="flex items-center gap-2">
-                             <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
+                            <div className="hidden sm:flex items-center space-x-2">
+                                <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-400">From:</label>
+                                <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border dark:bg-gray-700 dark:border-gray-600 rounded-md text-center" />
+                                <label htmlFor={`${sec.id}-end-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-400">To:</label>
+                                <input type="number" id={`${sec.id}-end-hour`} defaultValue="24" min="0" max="24" className="w-16 p-1 border dark:bg-gray-700 dark:border-gray-600 rounded-md text-center" />
+                            </div>
+                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                                <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                            </button>
+                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                                <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                            </button>
+                            <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
-                        <div className="my-4">
-                            <div className="flex justify-end gap-2">
-                                <button id="edit-backlog-btn" className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <Pencil size={14} /> Edit
-                                </button>
-                                <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                                    <Upload size={14} /> Upload
-                                </button>
-                                <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                    <Download size={14} /> Export
-                                </button>
-                            </div>
+                    <div id={`${sec.id}-content`} className="hidden">
+                        <div className="overflow-x-auto pb-4 mt-4 -mx-4 px-4">
+                            <div id={`${sec.id}-input-container`} className="flex space-x-2 min-w-[1200px]"></div>
                         </div>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                            <thead className="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Marketplace Store</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Store Name</th>
-                                    <th scope="col" className="px6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Platform</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Accepted</th>
-                                </tr>
-                            </thead>
-                            <tbody id="backlog-table-body" className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                            </tbody>
-                        </table>
-                      </div>
-                      <div className="flex items-center justify-end space-x-2 py-4 text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Records per page:</span>
-                        <select id="records-per-page" className="border rounded-md px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="30">30</option>
-                        </select>
-                        <span id="page-info" className="text-gray-500 dark:text-gray-400 w-24 text-center">1-5 of 31</span>
-                        <div className="flex items-center space-x-1">
-                            <button id="first-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button id="prev-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <ChevronRight className="w-5 h-5 transform rotate-180" />
-                            </button>
-                            <button id="next-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button id="last-page" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <ChevronsRight className="w-5 h-5" />
-                            </button>
-                        </div>
-                      </div>
-                      <div className="mt-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">Grafik Backlog Marketplace Store</h3>
-                             <div className="flex items-center gap-2">
-                                <select id="backlog-filter" className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
-                                  <option value="source">Marketplace Store</option>
-                                  <option value="platform">Store Name</option>
-                                  <option value="marketplace_platform">Platform</option>
-                                </select>
-                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mb-4 text-center">
-                            <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Payment Accepted</p>
-                                <p id="chart-payment-accepted-value" className="text-2xl font-bold text-indigo-500 dark:text-teal-400">0</p>
-                            </div>
-                            <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Marketplace Store</p>
-                                <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500 dark:text-teal-400">0</p>
-                            </div>
-                        </div>
-                        <div className="h-96 bg-white dark:bg-gray-800 rounded-md p-4">
-                           <canvas id="backlog-chart"></canvas>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-
-                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div id="summary-pick-header" className="flex justify-between items-center p-4 cursor-pointer">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-lg font-semibold">Summary Pick</h2>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span>Total: <span id="summary-pick-total">0</span></span>
-                                <Users className="w-4 h-4" />
-                                <span id="summary-pick-users">0</span>
-                                <Clock className="w-4 h-4" />
-                                <span id="summary-pick-avg-time">0</span>
-                            </div>
-                        </div>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
-                    </div>
-                    <div id="summary-pick-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-                        <div className="flex flex-wrap items-center justify-end gap-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="pick-from-filter">From:</label>
-                                <input id="pick-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="pick-to-filter">To:</label>
-                                <input id="pick-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <button onClick={() => (window as any).uploadCSV('pick')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                                <Upload size={14} /> Upload
-                            </button>
-                            <button onClick={() => (window as any).exportCSV('pick')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                <Download size={14} /> Export
-                            </button>
-                        </div>
-                        <div className="relative overflow-hidden">
-                            <div id="pick-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
-                                {/* Hourly inputs will be rendered here by JS */}
-                            </div>
-                        </div>
-                        <div className="relative h-96 mt-4">
-                             <h3 className="text-center font-semibold mb-2">Grafik Total Picked</h3>
-                             <canvas id="summary-pick-chart"></canvas>
+                        <div className="mt-4 h-80">
+                            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
+                            <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div id="summary-pack-header" className="flex justify-between items-center p-4 cursor-pointer">
-                        <div className="flex items-center gap-4">
-                           <h2 className="text-lg font-semibold">Summary Pack</h2>
-                           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span>Total: <span id="summary-pack-total">0</span></span>
-                                <Users className="w-4 h-4" />
-                                <span id="summary-pack-users">0</span>
-                                <Clock className="w-4 h-4" />
-                                <span id="summary-pack-avg-time">0</span>
-                            </div>
-                        </div>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
-                    </div>
-                    <div id="summary-pack-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-                         <div className="flex flex-wrap items-center justify-end gap-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="pack-from-filter">From:</label>
-                                <input id="pack-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="pack-to-filter">To:</label>
-                                <input id="pack-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <button onClick={() => (window as any).uploadCSV('pack')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                                <Upload size={14} /> Upload
-                            </button>
-                            <button onClick={() => (window as any).exportCSV('pack')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                <Download size={14} /> Export
-                            </button>
-                        </div>
-                        <div className="relative overflow-hidden">
-                            <div id="pack-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
-                                {/* Hourly inputs will be rendered here by JS */}
-                            </div>
-                        </div>
-                        <div className="relative h-96 mt-4">
-                             <h3 className="text-center font-semibold mb-2">Grafik Total Packed</h3>
-                             <canvas id="summary-pack-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div id="summary-ship-header" className="flex justify-between items-center p-4 cursor-pointer">
-                       <div className="flex items-center gap-4">
-                           <h2 className="text-lg font-semibold">Summary Ship</h2>
-                           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span>Total: <span id="summary-ship-total">0</span></span>
-                                <Users className="w-4 h-4" />
-                                <span id="summary-ship-users">0</span>
-                                <Clock className="w-4 h-4" />
-                                <span id="summary-ship-avg-time">0</span>
-                            </div>
-                        </div>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
-                    </div>
-                    <div id="summary-ship-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-                       <div className="flex flex-wrap items-center justify-end gap-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="ship-from-filter">From:</label>
-                                <input id="ship-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <label htmlFor="ship-to-filter">To:</label>
-                                <input id="ship-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                            </div>
-                            <button onClick={() => (window as any).uploadCSV('shipped')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                                <Upload size={14} /> Upload
-                            </button>
-                            <button onClick={() => (window as any).exportCSV('shipped')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                <Download size={14} /> Export
-                            </button>
-                        </div>
-                        <div className="relative overflow-hidden">
-                            <div id="ship-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
-                                {/* Hourly inputs will be rendered here by JS */}
-                            </div>
-                        </div>
-                        <div className="relative h-96 mt-4">
-                             <h3 className="text-center font-semibold mb-2">Grafik Total Shipped</h3>
-                             <canvas id="summary-ship-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            ))}
         </div>
-    </div>
-    
-    <div id="toast-container"></div>
+      </div>
+      
+      <div id="toast-container" className="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+      <style jsx>{`
+        .toast {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: fadeInOut 4s forwards;
+        }
+        .toast.success { background-color: #10B981; }
+        .toast.error { background-color: #EF4444; }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </>
   );
 }
