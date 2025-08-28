@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useRef } from 'react';
-import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download } from 'lucide-react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -78,7 +78,7 @@ export default function Home() {
         }
 
         let csvContent = headers.join(',') + '\n';
-        hours.forEach((hour, index) => {
+        hours.slice(0, 24).forEach((hour, index) => { // Only export up to 23:00
             csvContent += `${hour},${data[index] || 0}\n`;
         });
 
@@ -295,7 +295,7 @@ export default function Home() {
                     data: data,
                     backgroundColor: color,
                     borderColor: color,
-                    borderRadius: chartType === 'bar' ? 5 : undefined,
+                    borderRadius: chartType === 'bar' ? 4 : undefined,
                     borderWidth: 1,
                     tension: 0.4,
                     fill: false,
@@ -305,12 +305,14 @@ export default function Home() {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { grid: { display: false } },
+                    x: { 
+                        grid: { display: false } 
+                    },
                     y: { 
                         beginAtZero: true, 
                         grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' },
                         ticks: {
-                            stepSize: 100
+                            stepSize: 150,
                         }
                     }
                 },
@@ -750,38 +752,50 @@ export default function Home() {
             </div>
             
             {[
-                {id: 'pick', title: 'Summary Pick', color: 'indigo'},
-                {id: 'pack', title: 'Summary Pack', color: 'yellow'},
-                {id: 'shipped', title: 'Summary Ship', color: 'emerald'},
+                {id: 'pick', title: 'Summary Pick', color: '#ef4444'},
+                {id: 'pack', title: 'Summary Pack', color: '#f59e0b'},
+                {id: 'shipped', title: 'Summary Ship', color: '#10b981'},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
+                    <div className="flex flex-wrap justify-between items-center gap-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
                         <div className="flex items-center gap-4">
                             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
                             <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
                             <span className={`text-sm font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                           <div className="hidden sm:flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                        <div className="flex items-center gap-2">
+                           <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
                                 <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
                                 <label htmlFor={`${sec.id}-end-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">To:</label>
                                 <input type="number" id={`${sec.id}-end-hour`} defaultValue="24" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
                             </div>
-                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow">
+                            <div className="flex items-center gap-2">
+                                <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronLeft size={16}/></button>
+                                <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronRight size={16}/></button>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">
                                 <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
                             </button>
-                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow">
+                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow">
                                 <Download size={16} /> <span className="hidden sm:inline">Export</span>
                             </button>
                             <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
                     </div>
-                    <div id={`${sec.id}-content`} className="pt-4 hidden">
+                    <div id={`${sec.id}-content`} className="pt-6 hidden">
                         <div id={`${sec.id}-input-container`} className="space-y-4"></div>
-                        <div className="mt-6 h-80">
-                            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
-                            <canvas id={`${sec.id}-chart`}></canvas>
+                        <div className="mt-8 relative h-96">
+                             <canvas id={`${sec.id}-chart`}></canvas>
+                             <div className="flex justify-center items-center gap-4 mt-4">
+                                <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">Grafik Total {sec.title.split(' ')[1]}</h3>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-sm" style={{backgroundColor: sec.color}}></div>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Jumlah Order {sec.title.split(' ')[1]}</span>
+                                </div>
+                             </div>
                         </div>
                     </div>
                 </div>
@@ -817,9 +831,11 @@ export default function Home() {
             transition: transform 0.3s ease;
         }
         .rotate-180 {
-            transform: rotate(-180deg);
+            transform: rotate(180deg);
         }
       `}</style>
     </>
   );
 }
+
+    
