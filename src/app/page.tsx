@@ -20,6 +20,7 @@ export default function Home() {
     let backlogChartInstance: any; 
     let currentPage = 1;
     let recordsPerPage = 5;
+    let isEditingBacklog = false;
 
     const generateHours = () => {
         const hours = [];
@@ -428,24 +429,103 @@ export default function Home() {
     
     const renderBacklogTable = () => {
         const tableBody = document.getElementById('backlog-table-body');
-        if (!tableBody) return;
+        const editButton = document.getElementById('edit-backlog-btn');
+        if (!tableBody || !editButton) return;
+
+        if (isEditingBacklog) {
+            editButton.textContent = 'Save';
+        } else {
+            editButton.textContent = 'Edit';
+        }
 
         tableBody.innerHTML = '';
         const startIndex = (currentPage - 1) * recordsPerPage;
         const endIndex = startIndex + recordsPerPage;
         const paginatedData = backlogData.slice(startIndex, endIndex);
 
-        paginatedData.forEach(item => {
+        paginatedData.forEach((item, index) => {
+            const globalIndex = startIndex + index;
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.marketplace_platform}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${(parseInt(item.payment_order, 10) || 0).toLocaleString('en-US')}</td>
-            `;
+            if (isEditingBacklog) {
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.source}" data-index="${globalIndex}" data-field="source" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
+                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.platform}" data-index="${globalIndex}" data-field="platform" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
+                    <td class="px-6 py-4 whitespace-nowrap"><input type="text" value="${item.marketplace_platform}" data-index="${globalIndex}" data-field="marketplace_platform" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
+                    <td class="px-6 py-4 whitespace-nowrap"><input type="number" value="${item.payment_order}" data-index="${globalIndex}" data-field="payment_order" class="w-full bg-gray-100 dark:bg-gray-700 p-1 rounded"></td>
+                `;
+            } else {
+                 row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.marketplace_platform}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${(parseInt(item.payment_order, 10) || 0).toLocaleString('en-US')}</td>
+                `;
+            }
             tableBody.appendChild(row);
         });
         updatePaginationControls();
+    };
+
+    const toggleEditBacklog = () => {
+        isEditingBacklog = !isEditingBacklog;
+        if (!isEditingBacklog) {
+            // Save logic
+            const inputs = document.querySelectorAll('#backlog-table-body input');
+            inputs.forEach(input => {
+                const htmlInput = input as HTMLInputElement;
+                const index = parseInt(htmlInput.dataset.index || '0', 10);
+                const field = htmlInput.dataset.field as keyof typeof backlogData[0];
+                if (backlogData[index] && field) {
+                    (backlogData[index] as any)[field] = htmlInput.value;
+                }
+            });
+            updateDashboard();
+            showToast('Backlog data saved!', 'success');
+        }
+        renderBacklogTable();
+    };
+
+    const makeEditable = (id: string, onSave: (value: string) => void) => {
+        const element = document.getElementById(id);
+        const parent = element?.parentElement;
+        if (!element || !parent) return;
+
+        const currentValue = element.innerText;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = currentValue.replace(/,/g, '');
+        input.className = 'text-2xl font-bold mt-2 bg-gray-200 dark:bg-gray-600 rounded w-full';
+
+        const saveButton = document.createElement('button');
+        saveButton.innerText = 'Save';
+        saveButton.className = 'ml-2 px-2 py-1 bg-green-500 text-white rounded text-sm';
+        
+        const container = document.createElement('div');
+        container.className = 'flex items-center';
+        container.appendChild(input);
+        container.appendChild(saveButton);
+
+        parent.replaceChild(container, element);
+        input.focus();
+
+        const save = () => {
+            onSave(input.value);
+            parent.replaceChild(element, container);
+            element.innerText = parseInt(input.value, 10).toLocaleString('en-US');
+        };
+
+        saveButton.addEventListener('click', save);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') save();
+        });
+        input.addEventListener('blur', () => {
+            // Use timeout to allow save button click
+            setTimeout(() => {
+                if (document.body.contains(container)) {
+                     parent.replaceChild(element, container);
+                }
+            }, 200);
+        });
     };
     
     const updatePaginationControls = () => {
@@ -542,6 +622,27 @@ export default function Home() {
       changePage(totalPages);
     });
 
+    document.getElementById('edit-backlog-btn')?.addEventListener('click', toggleEditBacklog);
+
+    document.getElementById('edit-picker-btn')?.addEventListener('click', () => {
+        makeEditable('jumlah-picker', (value) => {
+            // Here you would normally save the value to a backend
+            console.log('Picker count saved:', value);
+        });
+    });
+
+    document.getElementById('edit-packer-btn')?.addEventListener('click', () => {
+        makeEditable('jumlah-packer', (value) => {
+            console.log('Packer count saved:', value);
+        });
+    });
+
+    document.getElementById('edit-dispatcher-btn')?.addEventListener('click', () => {
+        makeEditable('jumlah-dispatcher', (value) => {
+            console.log('Dispatcher count saved:', value);
+        });
+    });
+
   }, []);
 
   return (
@@ -611,7 +712,7 @@ export default function Home() {
                     <div id="marketplace-performance-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <h2 className="text-lg font-semibold">Marketplace Performance</h2>
                     </div>
-                    <div id="marketplace-performance-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
+                    <div id="marketplace-performance-content" className="p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         {/* <!-- Card Jumlah Picker --> */}
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -619,7 +720,7 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Picker</p>
                             <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4 text-blue-500" />
-                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                                <button id="edit-picker-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
                             </div>
                           </div>
                           <p id="jumlah-picker" className="text-2xl font-bold mt-2">0</p>
@@ -630,7 +731,7 @@ export default function Home() {
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Packer</p>
                                 <div className="flex items-center gap-2">
                                     <PackageCheck className="w-4 h-4 text-green-500" />
-                                    <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                                    <button id="edit-packer-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
                                 </div>
                             </div>
                             <p id="jumlah-packer" className="text-2xl font-bold mt-2">0</p>
@@ -641,7 +742,7 @@ export default function Home() {
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Jumlah Dispatcher</p>
                                 <div className="flex items-center gap-2">
                                     <SendHorizonal className="w-4 h-4 text-purple-500" />
-                                    <Pencil className="w-4 h-4 text-gray-400 cursor-pointer" />
+                                    <button id="edit-dispatcher-btn"><Pencil className="w-4 h-4 text-gray-400 cursor-pointer" /></button>
                                 </div>
                             </div>
                             <p id="jumlah-dispatcher" className="text-2xl font-bold mt-2">0</p>
@@ -707,7 +808,7 @@ export default function Home() {
                     </div>
                     <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex justify-end gap-2 mb-4 mt-4">
-                            <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <button id="edit-backlog-btn" className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
                             </button>
                             <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
@@ -828,5 +929,3 @@ export default function Home() {
     </>
   );
 }
-
-    
