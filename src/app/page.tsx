@@ -464,15 +464,17 @@ export default function Home() {
     const setupCollapsible = () => {
         document.querySelectorAll('[data-collapsible-trigger]').forEach(trigger => {
             trigger.addEventListener('click', (event) => {
+                const clickable = event.currentTarget as HTMLElement;
+                const contentId = clickable.getAttribute('data-collapsible-trigger');
+                if (!contentId) return;
+
                 const targetEl = event.target as HTMLElement;
-                // Ignore clicks on interactive elements within the header
                 if (targetEl.closest('button, a, input, select')) {
                     return;
                 }
 
-                const contentId = trigger.getAttribute('data-collapsible-trigger');
-                const content = document.getElementById(contentId!);
-                const icon = trigger.querySelector('.lucide-chevron-down');
+                const content = document.getElementById(contentId);
+                const icon = clickable.querySelector('.lucide-chevron-down');
 
                 if (content && icon) {
                     const isHidden = content.classList.contains('hidden');
@@ -762,7 +764,7 @@ export default function Home() {
                 {id: 'shipped', title: 'Summary Ship', color: '#10b981'},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-                    <div className="flex flex-wrap justify-between items-center gap-y-4" data-collapsible-trigger={`${sec.id}-content`}>
+                    <div className="flex flex-wrap justify-between items-center gap-y-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
                         <div className="flex items-center gap-4">
                             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
                             <div className="flex items-baseline gap-2">
@@ -800,13 +802,11 @@ export default function Home() {
                         </div>
                         <div className="mt-8 relative h-96">
                              <canvas id={`${sec.id}-chart`}></canvas>
-                             <div className="flex justify-center items-center gap-4 mt-4">
+                             <div className="flex justify-center items-center flex-wrap gap-x-4 gap-y-2 mt-4">
+                                <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">Grafik Total {sec.title.split(' ')[1]}</h3>
                                 <div className="flex items-center gap-2">
-                                  <h3 className="text-md font-medium text-gray-800 dark:text-gray-200">Grafik Total {sec.title.split(' ')[1]}</h3>
-                                  <div className="flex items-center gap-2">
-                                      <div className="w-4 h-4 rounded-sm" style={{backgroundColor: sec.color}}></div>
-                                      <span className="text-sm text-gray-600 dark:text-gray-400">Jumlah Order {sec.title.split(' ')[1]}</span>
-                                  </div>
+                                    <div className="w-4 h-4 rounded-sm" style={{backgroundColor: sec.color}}></div>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Jumlah Order {sec.title.split(' ')[1]}</span>
                                 </div>
                              </div>
                         </div>
@@ -850,4 +850,5 @@ export default function Home() {
     </>
   );
 }
+
 
