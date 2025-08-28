@@ -1,4 +1,3 @@
-
 "use client"
 import { useEffect } from 'react';
 import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2 } from 'lucide-react';
@@ -282,7 +281,10 @@ export default function Home() {
 
         const backlogCtx = document.getElementById('backlog-chart') as HTMLCanvasElement;
         if (backlogCtx) {
-          const labels = backlogData.map(item => item.platform);
+          const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
+          const filterValue = filterSelect ? filterSelect.value : 'platform';
+          
+          const labels = backlogData.map(item => item[filterValue]);
           const data = backlogData.map(item => parseInt(item.payment_order, 10));
 
           backlogChartInstance = new Chart(backlogCtx, {
@@ -377,6 +379,11 @@ export default function Home() {
         localStorage.setItem('theme', currentTheme);
         renderCharts();
     });
+
+    const backlogFilter = document.getElementById('backlog-filter');
+    if (backlogFilter) {
+      backlogFilter.addEventListener('change', renderCharts);
+    }
 
   }, []);
 
@@ -489,8 +496,10 @@ export default function Home() {
                             <h3 className="text-lg font-semibold">Grafik Backlog Marketplace Store</h3>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
-                                  <select className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
-                                    <option>Payment Accepted</option>
+                                  <select id="backlog-filter" className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="platform">Store Name</option>
+                                    <option value="source">Marketplace Store</option>
+                                    <option value="platform">Platform</option>
                                   </select>
                                   <button className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <Settings2 size={16} />
