@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useRef } from 'react';
-import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, UserCheck, PackagePlus, Truck, LineChart, BarChart3, Clock, Upload, Download } from 'lucide-react';
+import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, UserCheck, PackagePlus, Truck, LineChart, BarChart3, Clock, Upload, Download, Pencil, BarChart, User, Package, Settings, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 export default function Home() {
   const chartInstances = useRef<{ [key: string]: any }>({});
@@ -249,6 +249,10 @@ export default function Home() {
         setText('payment-accepted-count', paymentOrders);
         setText('in-progress-orders', inProgressOrders);
         
+        setText('jumlah-picker-value', pickerCount);
+        setText('jumlah-packer-value', packerCount);
+        setText('jumlah-dispatcher-value', dispatcherCount);
+        
         setText('average-pick-per-hour', Math.round(totalPickOrder / nonZeroPick));
         setText('average-pack-per-hour', Math.round(totalPackOrder / nonZeroPack));
         setText('average-shipped-per-hour', Math.round(totalShippedOrder / nonZeroShipped));
@@ -260,8 +264,8 @@ export default function Home() {
         const updatePerfCard = (elementId: string, percentage: number) => {
             const el = document.getElementById(elementId);
             if (!el) return;
-            el.classList.remove('bg-green-100', 'text-green-800', 'bg-yellow-100', 'text-yellow-800', 'bg-red-100', 'text-red-800', 'bg-gray-100', 'text-gray-800');
-            el.classList.remove('dark:bg-green-900/50', 'dark:text-green-300', 'dark:bg-yellow-900/50', 'dark:text-yellow-300', 'dark:bg-red-900/50', 'dark:text-red-300', 'dark:bg-gray-700', 'dark:text-gray-300');
+            el.classList.remove('bg-green-100', 'text-green-800', 'bg-yellow-100', 'text-yellow-800', 'bg-red-100', 'text-red-800', 'bg-gray-100', 'text-gray-800', 'bg-slate-500', 'text-white');
+            el.classList.remove('dark:bg-green-900/50', 'dark:text-green-300', 'dark:bg-yellow-900/50', 'dark:text-yellow-300', 'dark:bg-red-900/50', 'dark:text-red-300', 'dark:bg-gray-700', 'dark:text-gray-300', 'dark:bg-slate-700', 'dark:text-white');
             
             if (percentage >= 100) {
                 el.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/50', 'dark:text-green-300');
@@ -270,7 +274,7 @@ export default function Home() {
             } else if (percentage > 0) {
                 el.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/50', 'dark:text-red-300');
             } else {
-                el.classList.add('bg-gray-100', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-300');
+                 el.classList.add('bg-slate-500', 'text-white', 'dark:bg-slate-700', 'dark:text-white');
             }
         };
 
@@ -429,13 +433,20 @@ export default function Home() {
     
     const setupCollapsible = () => {
         document.querySelectorAll('[data-collapsible-trigger]').forEach(trigger => {
-            trigger.addEventListener('click', () => {
+            trigger.addEventListener('click', (event) => {
+                const target = event.target as HTMLElement;
+                // Ignore clicks on interactive elements within the header
+                if (target.closest('button, a, input, select')) {
+                    return;
+                }
+
                 const contentId = trigger.getAttribute('data-collapsible-trigger');
                 const content = document.getElementById(contentId!);
                 const icon = trigger.querySelector('.lucide-chevron-down');
 
                 if (content && icon) {
-                    const isHidden = content.classList.toggle('hidden');
+                    const isHidden = content.classList.contains('hidden');
+                    content.classList.toggle('hidden');
                     icon.classList.toggle('rotate-180', !isHidden);
                 }
             });
@@ -452,7 +463,10 @@ export default function Home() {
         ['picker-input', 'packer-input', 'dispatcher-input', 
          'pick-start-hour', 'pick-end-hour', 'pack-start-hour', 'pack-end-hour', 
          'shipped-start-hour', 'shipped-end-hour'].forEach(id => {
-            document.getElementById(id)?.addEventListener('input', updateDashboard);
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', updateDashboard);
+            }
         });
 
         const setupFilterButton = (buttonId: string, filterType: 'platform' | 'source', otherButtonId: string) => {
@@ -575,49 +589,96 @@ export default function Home() {
                 
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="performance-content">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Performance Manpower</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Marketplace Performance</h2>
                     <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
                 </div>
-                <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4 hidden">
-                    {[
-                      {id: 'picker', label: 'Jumlah Picker', icon: UserCheck},
-                      {id: 'packer', label: 'Jumlah Packer', icon: PackagePlus},
-                      {id: 'dispatcher', label: 'Jumlah Dispatcher', icon: Truck},
-                    ].map(item => (
-                      <div key={item.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{item.label}</p>
-                          <div className="flex items-center gap-4 mt-2">
-                              <item.icon className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-                              <input type="number" id={`${item.id}-input`} defaultValue="0" className="text-2xl font-bold bg-transparent w-full focus:outline-none text-gray-800 dark:text-gray-100" min="0" />
-                          </div>
-                      </div>
-                    ))}
-                     {[
-                        {id: 'picker', label: 'Performance Picker', icon: LineChart},
-                        {id: 'packer', label: 'Performance Packer', icon: LineChart},
-                        {id: 'shipped', label: 'Performance Dispatcher', icon: LineChart},
-                    ].map(item => (
-                        <div key={item.id} id={`card-performance-${item.id}`} className="p-4 rounded-lg flex justify-between items-center transition-colors duration-300">
-                           <div>
-                                <p className="text-sm font-medium">{item.label}</p>
-                                <p className="text-2xl font-bold mt-1" id={`performance-${item.id}-percentage`}>0%</p>
-                           </div>
-                           <item.icon className="w-7 h-7 opacity-70" />
-                        </div>
-                    ))}
-                    {[
-                        {id: 'pick', label: 'Average Pick / Hour', icon: BarChart3},
-                        {id: 'pack', label: 'Average Pack / Hour', icon: Clock},
-                        {id: 'shipped', label: 'Average Shipped / Hour', icon: Truck},
-                    ].map(item => (
-                        <div key={item.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
-                            <div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{item.label}</p>
-                                <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-gray-100" id={`average-${item.id}-per-hour`}>0</p>
+                <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    {/* Row 1 */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Picker</p>
+                            <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-blue-500" />
+                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
                             </div>
-                            <item.icon className={`w-7 h-7 text-${item.id === 'pick' ? 'purple' : item.id === 'pack' ? 'red' : 'orange'}-500 opacity-70`} />
                         </div>
-                    ))}
+                        <div className="flex items-center gap-2 mt-1">
+                            <span id="jumlah-picker-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
+                            <input type="number" id="picker-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Packer</p>
+                             <div className="flex items-center gap-2">
+                                <Package className="w-4 h-4 text-green-500" />
+                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                             <span id="jumlah-packer-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
+                            <input type="number" id="packer-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+                        <div className="flex justify-between items-start">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Dispatcher</p>
+                             <div className="flex items-center gap-2">
+                                <Truck className="w-4 h-4 text-blue-500" />
+                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                            </div>
+                        </div>
+                         <div className="flex items-center gap-2 mt-1">
+                            <span id="jumlah-dispatcher-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
+                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                        </div>
+                    </div>
+
+                    {/* Row 2 */}
+                    <div id="card-performance-picker" className="p-4 rounded-lg flex justify-between items-center bg-slate-500 dark:bg-slate-700 text-white">
+                        <div>
+                            <p className="text-sm font-medium">Performance Picker</p>
+                            <p className="text-2xl font-bold mt-1" id="performance-picker-percentage">0.00%</p>
+                        </div>
+                        <LineChart className="w-7 h-7 opacity-70" />
+                    </div>
+                    <div id="card-performance-packer" className="p-4 rounded-lg flex justify-between items-center bg-slate-500 dark:bg-slate-700 text-white">
+                        <div>
+                            <p className="text-sm font-medium">Performance Packer</p>
+                            <p className="text-2xl font-bold mt-1" id="performance-packer-percentage">0.00%</p>
+                        </div>
+                        <LineChart className="w-7 h-7 opacity-70" />
+                    </div>
+                    <div id="card-performance-shipped" className="p-4 rounded-lg flex justify-between items-center bg-slate-500 dark:bg-slate-700 text-white">
+                        <div>
+                            <p className="text-sm font-medium">Performance Dispatcher</p>
+                            <p className="text-2xl font-bold mt-1" id="performance-shipped-percentage">0.00%</p>
+                        </div>
+                        <LineChart className="w-7 h-7 opacity-70" />
+                    </div>
+
+                    {/* Row 3 */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 flex justify-between items-center">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Average Pick / Hour</p>
+                            <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-gray-100" id="average-pick-per-hour">0</p>
+                        </div>
+                        <BarChart className="w-7 h-7 text-purple-500 opacity-70" />
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 flex justify-between items-center">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Average Pack / Hour</p>
+                            <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-gray-100" id="average-pack-per-hour">0</p>
+                        </div>
+                        <Clock className="w-7 h-7 text-red-500 opacity-70" />
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 flex justify-between items-center">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Average Shipped / Hour</p>
+                            <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-gray-100" id="average-shipped-per-hour">0</p>
+                        </div>
+                        <Truck className="w-7 h-7 text-orange-500 opacity-70" />
+                    </div>
                 </div>
             </div>
 
@@ -634,7 +695,7 @@ export default function Home() {
                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                 </div>
-                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4 hidden">
+                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4">
                     <div className="lg:col-span-3 overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -692,7 +753,7 @@ export default function Home() {
                             <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
                     </div>
-                    <div id={`${sec.id}-content`} className="hidden">
+                    <div id={`${sec.id}-content`}>
                         <div className="overflow-x-auto pb-4 mt-4 -mx-4 px-4">
                             <div id={`${sec.id}-input-container`} className="flex space-x-2 min-w-[1200px]"></div>
                         </div>
@@ -721,6 +782,15 @@ export default function Home() {
         @keyframes fadeInOut {
             0%, 100% { opacity: 0; transform: translateY(20px); }
             10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+        #picker-input, #packer-input, #dispatcher-input {
+            width: 6rem; /* Adjust width as needed */
+        }
+        .lucide-chevron-down {
+            transition: transform 0.3s ease;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
         }
       `}</style>
     </>
