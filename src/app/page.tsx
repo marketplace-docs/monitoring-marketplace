@@ -1,6 +1,6 @@
 "use client"
 import { useEffect } from 'react';
-import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, Users, BarChart3, Clock, Truck, Pencil, Upload, Download, Settings2, ChevronsLeft, ChevronsRight, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   useEffect(() => {
@@ -25,9 +25,8 @@ export default function Home() {
     const generateHours = () => {
         const hours = [];
         for (let i = 0; i < 24; i++) {
-            hours.push(`${i}:00`);
+            hours.push(`${String(i).padStart(2, '0')}:00`);
         }
-        hours.push('24:00');
         return hours;
     };
     
@@ -296,7 +295,82 @@ export default function Home() {
         setInnerText('chart-marketplace-store-value', summary.marketplaceStoreCount.toString());
     };
 
+     const renderSummaryChart = async (type: 'pick' | 'pack' | 'shipped') => {
+        const Chart = (await import('chart.js/auto')).default;
+        let chartInstance: any, ctx: HTMLCanvasElement | null, data: number[], label: string, borderColor: string;
+
+        if (type === 'pick') {
+            chartInstance = pickChartInstance;
+            ctx = document.getElementById('summary-pick-chart') as HTMLCanvasElement;
+            data = pickData;
+            label = 'Jumlah Order Pick';
+            borderColor = '#EF4444';
+        } else if (type === 'pack') {
+            chartInstance = packChartInstance;
+            ctx = document.getElementById('summary-pack-chart') as HTMLCanvasElement;
+            data = packData;
+            label = 'Jumlah Order Pack';
+            borderColor = '#F97316';
+        } else { // shipped
+            chartInstance = shippedChartInstance;
+            ctx = document.getElementById('summary-ship-chart') as HTMLCanvasElement;
+            data = shippedData;
+            label = 'Jumlah Order Ship';
+            borderColor = '#A855F7';
+        }
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        if (ctx) {
+            const newChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: borderColor,
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: borderColor,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            if (type === 'pick') pickChartInstance = newChartInstance;
+            else if (type === 'pack') packChartInstance = newChartInstance;
+            else shippedChartInstance = newChartInstance;
+        }
+    };
+
     const renderCharts = async () => {
+        renderSummaryChart('pick');
+        renderSummaryChart('pack');
+        renderSummaryChart('shipped');
+        
         const Chart = (await import('chart.js/auto')).default;
         const ChartDataLabels = (await import('chartjs-plugin-datalabels')).default;
         Chart.register(ChartDataLabels);
@@ -420,11 +494,51 @@ export default function Home() {
           });
         }
     };
+    
+    const renderHourlyInputs = (type: 'pick' | 'pack' | 'shipped') => {
+        const container = document.getElementById(`${type}-hourly-inputs`);
+        if (!container) return;
+
+        container.innerHTML = '';
+        const data = type === 'pick' ? pickData : (type === 'pack' ? packData : shippedData);
+
+        hours.forEach((hour, index) => {
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'flex flex-col items-center space-y-1';
+            inputGroup.innerHTML = `
+                <span class="text-xs text-gray-500">${hour}</span>
+                <input type="number" value="${data[index]}" data-index="${index}" class="w-16 p-1 text-center border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+            `;
+            container.appendChild(inputGroup);
+        });
+
+        container.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const target = e.target as HTMLInputElement;
+                const index = parseInt(target.dataset.index || '0');
+                const value = parseInt(target.value, 10) || 0;
+                if (type === 'pick') {
+                    pickData[index] = value;
+                    originalPickData[index] = value;
+                } else if (type === 'pack') {
+                    packData[index] = value;
+                    originalPackData[index] = value;
+                } else {
+                    shippedData[index] = value;
+                    originalShippedData[index] = value;
+                }
+                updateDashboard();
+            });
+        });
+    };
 
     const updateDashboard = () => {
         updateSummary();
         renderBacklogTable();
         renderCharts();
+        renderHourlyInputs('pick');
+        renderHourlyInputs('pack');
+        renderHourlyInputs('shipped');
     };
     
     const renderBacklogTable = () => {
@@ -666,7 +780,7 @@ export default function Home() {
                 </button>
             </header>
 
-            <div>
+             <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                     From <span className="font-medium text-green-500">payment</span> to progress — only cleared orders move forward to <span className="font-medium text-red-500">pick</span>, <span className="font-medium text-orange-500">pack</span>, and <span className="font-medium text-purple-500">ship</span>.
                 </p>
@@ -802,16 +916,18 @@ export default function Home() {
                         <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
                     <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-end gap-2 my-4">
-                            <button id="edit-backlog-btn" className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                               <Pencil size={14} /> Edit
-                            </button>
-                            <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
-                                <Upload size={14} /> Upload
-                            </button>
-                            <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                <Download size={14} /> Export
-                            </button>
+                        <div className="my-4">
+                            <div className="flex justify-end gap-2">
+                                <button id="edit-backlog-btn" className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <Pencil size={14} /> Edit
+                                </button>
+                                <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                                    <Upload size={14} /> Upload
+                                </button>
+                                <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                    <Download size={14} /> Export
+                                </button>
+                            </div>
                         </div>
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
@@ -882,12 +998,42 @@ export default function Home() {
                     <div id="summary-pick-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <div className="flex items-center gap-4">
                             <h2 className="text-lg font-semibold">Summary Pick</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Total: <span id="summary-pick-total">0</span></p>
+                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Total: <span id="summary-pick-total">0</span></span>
+                                <Users className="w-4 h-4" />
+                                <span id="summary-pick-users">0</span>
+                                <Clock className="w-4 h-4" />
+                                <span id="summary-pick-avg-time">0</span>
+                            </div>
                         </div>
                         <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="summary-pick-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                        <p>Pick summary content goes here...</p>
+                    <div id="summary-pick-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                        <div className="flex flex-wrap items-center justify-end gap-4">
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="pick-from-filter">From:</label>
+                                <input id="pick-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="pick-to-filter">To:</label>
+                                <input id="pick-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <button onClick={() => (window as any).uploadCSV('pick')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                                <Upload size={14} /> Upload
+                            </button>
+                            <button onClick={() => (window as any).exportCSV('pick')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <Download size={14} /> Export
+                            </button>
+                        </div>
+                        <div className="relative overflow-hidden">
+                            <div id="pick-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
+                                {/* Hourly inputs will be rendered here by JS */}
+                            </div>
+                        </div>
+                        <div className="relative h-96 mt-4">
+                             <h3 className="text-center font-semibold mb-2">Grafik Total Picked</h3>
+                             <canvas id="summary-pick-chart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -895,12 +1041,42 @@ export default function Home() {
                     <div id="summary-pack-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <div className="flex items-center gap-4">
                            <h2 className="text-lg font-semibold">Summary Pack</h2>
-                           <p className="text-sm text-gray-500 dark:text-gray-400">Total: <span id="summary-pack-total">0</span></p>
+                           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Total: <span id="summary-pack-total">0</span></span>
+                                <Users className="w-4 h-4" />
+                                <span id="summary-pack-users">0</span>
+                                <Clock className="w-4 h-4" />
+                                <span id="summary-pack-avg-time">0</span>
+                            </div>
                         </div>
                         <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="summary-pack-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                       <p>Pack summary content goes here...</p>
+                    <div id="summary-pack-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                         <div className="flex flex-wrap items-center justify-end gap-4">
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="pack-from-filter">From:</label>
+                                <input id="pack-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="pack-to-filter">To:</label>
+                                <input id="pack-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <button onClick={() => (window as any).uploadCSV('pack')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                                <Upload size={14} /> Upload
+                            </button>
+                            <button onClick={() => (window as any).exportCSV('pack')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <Download size={14} /> Export
+                            </button>
+                        </div>
+                        <div className="relative overflow-hidden">
+                            <div id="pack-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
+                                {/* Hourly inputs will be rendered here by JS */}
+                            </div>
+                        </div>
+                        <div className="relative h-96 mt-4">
+                             <h3 className="text-center font-semibold mb-2">Grafik Total Packed</h3>
+                             <canvas id="summary-pack-chart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -908,12 +1084,42 @@ export default function Home() {
                     <div id="summary-ship-header" className="flex justify-between items-center p-4 cursor-pointer">
                        <div className="flex items-center gap-4">
                            <h2 className="text-lg font-semibold">Summary Ship</h2>
-                           <p className="text-sm text-gray-500 dark:text-gray-400">Total: <span id="summary-ship-total">0</span></p>
+                           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Total: <span id="summary-ship-total">0</span></span>
+                                <Users className="w-4 h-4" />
+                                <span id="summary-ship-users">0</span>
+                                <Clock className="w-4 h-4" />
+                                <span id="summary-ship-avg-time">0</span>
+                            </div>
                         </div>
                         <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="summary-ship-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                       <p>Ship summary content goes here...</p>
+                    <div id="summary-ship-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                       <div className="flex flex-wrap items-center justify-end gap-4">
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="ship-from-filter">From:</label>
+                                <input id="ship-from-filter" type="number" defaultValue="0" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <label htmlFor="ship-to-filter">To:</label>
+                                <input id="ship-to-filter" type="number" defaultValue="24" className="w-20 p-1 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                            </div>
+                            <button onClick={() => (window as any).uploadCSV('shipped')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
+                                <Upload size={14} /> Upload
+                            </button>
+                            <button onClick={() => (window as any).exportCSV('shipped')} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <Download size={14} /> Export
+                            </button>
+                        </div>
+                        <div className="relative overflow-hidden">
+                            <div id="ship-hourly-inputs" className="flex items-center gap-2 overflow-x-auto pb-4">
+                                {/* Hourly inputs will be rendered here by JS */}
+                            </div>
+                        </div>
+                        <div className="relative h-96 mt-4">
+                             <h3 className="text-center font-semibold mb-2">Grafik Total Shipped</h3>
+                             <canvas id="summary-ship-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
