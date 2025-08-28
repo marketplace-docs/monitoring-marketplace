@@ -373,16 +373,38 @@ export default function Home() {
         const create = (containerId: string, className: string, dataType: 'pick' | 'pack' | 'shipped') => {
             const container = document.getElementById(containerId);
             if (!container) return;
-            container.innerHTML = '';
-            hours.slice(0, 24).forEach((hour, index) => { // Only 00:00 to 23:00
+            container.innerHTML = ''; // Clear previous content
+
+            // Row 1: 00:00 - 11:00
+            const row1 = document.createElement('div');
+            row1.className = 'grid grid-cols-12 gap-x-2 gap-y-4';
+            hours.slice(0, 12).forEach((hour, index) => {
                 const div = document.createElement('div');
-                div.className = 'flex-none w-24 text-center';
+                div.className = 'text-center';
                 div.innerHTML = `
-                    <label class="block text-sm text-gray-500 dark:text-gray-400">${hour}</label>
-                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" value="0" min="0">
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">${hour}</label>
+                    <input type="number" data-index="${index}" class="${className} block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center py-1.5" value="0" min="0">
                 `;
-                container.appendChild(div);
+                row1.appendChild(div);
             });
+            container.appendChild(row1);
+
+            // Row 2: 12:00 - 23:00
+            const row2 = document.createElement('div');
+            row2.className = 'grid grid-cols-12 gap-x-2 gap-y-4 mt-4';
+             hours.slice(12, 24).forEach((hour, i) => {
+                const index = i + 12;
+                const div = document.createElement('div');
+                div.className = 'text-center';
+                div.innerHTML = `
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">${hour}</label>
+                    <input type="number" data-index="${index}" class="${className} block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center py-1.5" value="0" min="0">
+                `;
+                row2.appendChild(div);
+            });
+            container.appendChild(row2);
+
+
             container.querySelectorAll(`.${className}`).forEach(input => {
                 input.addEventListener('input', (e) => {
                     const index = parseInt((e.target as HTMLInputElement).dataset.index!, 10);
@@ -749,11 +771,9 @@ export default function Home() {
                             <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                         </div>
                     </div>
-                    <div id={`${sec.id}-content`} className="hidden">
-                         <div className="overflow-x-auto py-4 -mx-4 px-4">
-                            <div id={`${sec.id}-input-container`} className="grid grid-flow-col auto-cols-max gap-4"></div>
-                        </div>
-                        <div className="mt-4 h-80">
+                    <div id={`${sec.id}-content`} className="hidden pt-4">
+                        <div id={`${sec.id}-input-container`} className="space-y-4"></div>
+                        <div className="mt-6 h-80">
                             <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Grafik Total {sec.title.split(' ')[1]}</h3>
                             <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
@@ -779,15 +799,11 @@ export default function Home() {
             0%, 100% { opacity: 0; transform: translateY(20px); }
             10%, 90% { opacity: 1; transform: translateY(0); }
         }
-        #picker-input, #packer-input, #dispatcher-input {
+        input[type="number"] {
             -moz-appearance: textfield;
         }
-        #picker-input::-webkit-outer-spin-button,
-        #picker-input::-webkit-inner-spin-button,
-        #packer-input::-webkit-outer-spin-button,
-        #packer-input::-webkit-inner-spin-button,
-        #dispatcher-input::-webkit-outer-spin-button,
-        #dispatcher-input::-webkit-inner-spin-button {
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
           -webkit-appearance: none;
           margin: 0;
         }
