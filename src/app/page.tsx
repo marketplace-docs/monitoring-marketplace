@@ -244,6 +244,8 @@ export default function Home() {
         const paymentOrders = backlogData.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
+
+        const marketplaceStoreCount = new Set(backlogData.map(item => item.source)).size;
         
         summary = {
             totalPickOrder,
@@ -251,6 +253,7 @@ export default function Home() {
             totalShipped: totalShippedOrder,
             payment: paymentOrders,
             inProgress: inProgressOrders,
+            marketplaceStoreCount,
         };
 
         const setInnerText = (id: string, text: string) => {
@@ -268,6 +271,8 @@ export default function Home() {
         setInnerText('summary-pack-total', summary.totalPacked.toString());
         setInnerText('summary-ship-total', summary.totalShipped.toString());
         setInnerText('backlog-total', summary.payment.toString());
+        setInnerText('chart-payment-accepted-value', summary.payment.toString());
+        setInnerText('chart-marketplace-store-value', summary.marketplaceStoreCount.toString());
     };
 
     const renderCharts = async () => {
@@ -508,6 +513,16 @@ export default function Home() {
                                 <div className="text-sm">
                                     Total: <span id="backlog-total" className="font-semibold">0</span>
                                 </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-8 mb-4">
+                            <div className="flex items-center gap-2">
+                                <span id="chart-payment-accepted-value" className="text-xl font-bold text-blue-500">0</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">Payment Accepted</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span id="chart-marketplace-store-value" className="text-xl font-bold text-blue-500">0</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">Marketplace Store</span>
                             </div>
                         </div>
                         <div className="h-64 bg-gray-100 dark:bg-gray-700/50 rounded-md p-4">
