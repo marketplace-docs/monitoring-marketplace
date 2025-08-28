@@ -286,6 +286,10 @@ export default function Home() {
             chartInstances.current[canvasId].destroy();
         }
 
+        const maxValue = Math.max(...data, 0);
+        const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25 / 100) * 100 : 1000;
+        const stepSize = yAxisMax / 5;
+
         chartInstances.current[canvasId] = new Chart(ctx, {
             type: chartType,
             data: {
@@ -311,8 +315,9 @@ export default function Home() {
                     y: { 
                         beginAtZero: true, 
                         grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' },
+                        max: yAxisMax,
                         ticks: {
-                            stepSize: 150,
+                           stepSize: stepSize,
                         }
                     }
                 },
