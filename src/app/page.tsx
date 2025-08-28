@@ -100,7 +100,7 @@ export default function Home() {
         }
 
         let csvContent = headers.join(',') + '\n';
-        hours.slice(0, 24).forEach((hour, index) => { // Only export up to 23:00
+        hours.forEach((hour, index) => {
             csvContent += `${hour},${data[index] || 0}\n`;
         });
 
@@ -315,7 +315,17 @@ export default function Home() {
 
         const maxValue = Math.max(...data, 0);
         const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25) : 100;
-        const stepSize = yAxisMax > 1000 ? 200 : 100;
+        
+        let stepSize;
+        if (yAxisMax <= 100) {
+            stepSize = 20;
+        } else if (yAxisMax <= 500) {
+            stepSize = 50;
+        } else if (yAxisMax <= 1500){
+            stepSize = 100;
+        } else {
+            stepSize = 200;
+        }
 
         chartInstances.current[canvasId] = new Chart(ctx, {
             type: chartType,
@@ -779,8 +789,8 @@ export default function Home() {
                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                 </div>
-                <div id="backlog-content" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-4 hidden">
-                    <div className="lg:col-span-3 overflow-x-auto">
+                <div id="backlog-content" className="grid grid-cols-1 gap-6 mt-4 hidden">
+                    <div className="overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="border-b border-gray-200 dark:border-gray-700">
                                 <tr>
@@ -794,9 +804,9 @@ export default function Home() {
                         </table>
                     </div>
                     
-                    <div className="lg:col-span-2">
+                    <div className="flex flex-col items-center">
                         <h3 id="backlog-chart-title" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div className="flex flex-wrap justify-center gap-2 mt-2">
                             <div className="flex rounded-md shadow-sm">
                                <button id="filter-platform" className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-l-md hover:bg-indigo-700 transition-colors">Store</button>
                                <button id="filter-source" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Marketplace</button>
@@ -806,7 +816,7 @@ export default function Home() {
                                <button id="chart-data-payment" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
                             </div>
                         </div>
-                        <div className="h-80 mt-4">
+                        <div className="w-full h-80 mt-4">
                             <canvas id="backlog-chart"></canvas>
                         </div>
                     </div>
@@ -814,12 +824,12 @@ export default function Home() {
             </div>
             
             {[
-                {id: 'pick', title: 'Summary Pick', color: '#ef4444'},
-                {id: 'pack', title: 'Summary Pack', color: '#f59e0b'},
-                {id: 'shipped', title: 'Summary Ship', color: '#10b981'},
+                {id: 'pick', title: 'Summary Pick', color: '#ef4444', legend: 'Jumlah Order Pick'},
+                {id: 'pack', title: 'Summary Pack', color: '#f59e0b', legend: 'Jumlah Order Pack'},
+                {id: 'shipped', title: 'Summary Ship', color: '#10b981', legend: 'Jumlah Order Ship'},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-                    <div className="flex flex-wrap justify-between items-center gap-y-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-y-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
                         <div className="flex items-center gap-4">
                             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
                             <div className="flex items-baseline gap-2">
@@ -827,7 +837,7 @@ export default function Home() {
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
+                        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap justify-between">
                            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
                                 <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="23" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
