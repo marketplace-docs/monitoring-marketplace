@@ -259,7 +259,7 @@ export default function Home() {
         
         const inProgressOrders = totalPickOrder - totalPackOrder;
 
-        const marketplaceStoreCount = backlogData.length;
+        const marketplaceStoreCount = new Set(backlogData.map(item => item.source)).size;
         
         summary = {
             totalPickOrder,
@@ -375,7 +375,11 @@ export default function Home() {
       const header = document.getElementById(headerId);
       const icon = header?.querySelector('.chevron-icon');
       const content = document.getElementById(contentId);
-      header?.addEventListener('click', () => {
+      header?.addEventListener('click', (e) => {
+          // prevent header click from toggling when clicking on buttons inside
+          if ((e.target as HTMLElement).closest('button')) {
+            return;
+          }
           const isHidden = content?.classList.toggle('hidden');
           if (isHidden) {
               icon?.classList.remove('rotate-90');
@@ -481,7 +485,9 @@ export default function Home() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
-                        <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
+                        </div>
                         <div className="flex items-center gap-2">
                            <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
