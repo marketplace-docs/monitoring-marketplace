@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useRef } from 'react';
-import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, UserCheck, PackagePlus, Truck, LineChart, BarChart3, Clock, Upload, Download, Pencil, BarChart, User, Package, Settings, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download } from 'lucide-react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -755,7 +755,7 @@ export default function Home() {
                             <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
                             <span className={`text-sm font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4">
                            <div className="hidden sm:flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
                                 <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
@@ -817,5 +817,3 @@ export default function Home() {
     </>
   );
 }
-
-    
