@@ -2,24 +2,14 @@
 "use client";
 import { useEffect, useRef } from 'react';
 import { ChevronDown, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, UserCheck, PackagePlus, Truck, LineChart, BarChart3, Clock, Upload, Download, Pencil, BarChart, User, Package, Settings, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import Chart from 'chart.js/auto';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 export default function Home() {
-  const chartInstances = useRef<{ [key: string]: any }>({});
+  const chartInstances = useRef<{ [key: string]: Chart }>({});
 
   useEffect(() => {
-    // Pastikan Chart.js dan pluginnya tersedia di window
-    if (typeof window.Chart === 'undefined') {
-        console.error('Chart.js not loaded');
-        return;
-    }
-
-    const Chart = window.Chart;
-    const ChartDataLabels = window.ChartDataLabels;
-    if (ChartDataLabels) {
-      Chart.register(ChartDataLabels);
-    } else {
-        console.error('ChartDataLabels plugin not loaded');
-    }
+    Chart.register(ChartDataLabels);
 
     let pickData: number[] = [];
     let packData: number[] = [];
@@ -599,12 +589,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Picker</p>
                             <div className="flex items-center gap-2">
                                 <User className="w-4 h-4 text-blue-500" />
-                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                            <span id="jumlah-picker-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
-                            <input type="number" id="picker-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                            <input type="number" id="picker-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                             <span id="jumlah-picker-value" className="hidden">0</span>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
@@ -612,12 +601,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Packer</p>
                              <div className="flex items-center gap-2">
                                 <Package className="w-4 h-4 text-green-500" />
-                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                             <span id="jumlah-packer-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
-                            <input type="number" id="packer-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                             <input type="number" id="packer-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                             <span id="jumlah-packer-value" className="hidden">0</span>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
@@ -625,12 +613,11 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Dispatcher</p>
                              <div className="flex items-center gap-2">
                                 <Truck className="w-4 h-4 text-blue-500" />
-                                <Pencil className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
                             </div>
                         </div>
                          <div className="flex items-center gap-2 mt-1">
-                            <span id="jumlah-dispatcher-value" className="text-2xl font-bold text-gray-800 dark:text-gray-100">0</span>
-                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-16 p-1 border-none dark:bg-gray-700 rounded-md text-center bg-transparent focus:outline-none" min="0" />
+                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-full p-1 border-none dark:bg-gray-700 rounded-md text-left bg-transparent focus:outline-none text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
+                            <span id="jumlah-dispatcher-value" className="hidden">0</span>
                         </div>
                     </div>
 
@@ -784,7 +771,17 @@ export default function Home() {
             10%, 90% { opacity: 1; transform: translateY(0); }
         }
         #picker-input, #packer-input, #dispatcher-input {
-            width: 6rem; /* Adjust width as needed */
+            width: 100%;
+            -moz-appearance: textfield;
+        }
+        #picker-input::-webkit-outer-spin-button,
+        #picker-input::-webkit-inner-spin-button,
+        #packer-input::-webkit-outer-spin-button,
+        #packer-input::-webkit-inner-spin-button,
+        #dispatcher-input::-webkit-outer-spin-button,
+        #dispatcher-input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
         }
         .lucide-chevron-down {
             transition: transform 0.3s ease;
