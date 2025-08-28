@@ -286,6 +286,10 @@ export default function Home() {
             chartInstances.current[canvasId].destroy();
         }
 
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        const textColor = isDarkMode ? '#e5e7eb' : '#374151';
+        const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+
         const maxValue = Math.max(...data, 0);
         const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25 / 100) * 100 : 1000;
         const stepSize = yAxisMax / 5;
@@ -310,14 +314,16 @@ export default function Home() {
                 maintainAspectRatio: false,
                 scales: {
                     x: { 
-                        grid: { display: false } 
+                        grid: { display: false },
+                        ticks: { color: textColor }
                     },
                     y: { 
                         beginAtZero: true, 
-                        grid: { color: document.body.classList.contains('dark') ? '#374151' : '#E5E7EB' },
+                        grid: { color: gridColor },
                         max: yAxisMax,
                         ticks: {
                            stepSize: stepSize,
+                           color: textColor
                         }
                     }
                 },
@@ -327,7 +333,7 @@ export default function Home() {
                         anchor: 'end',
                         align: 'top',
                         formatter: (value) => value > 0 ? value : null,
-                        color: document.body.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                        color: textColor,
                         font: { weight: 'bold' }
                     }
                 }
@@ -534,7 +540,8 @@ export default function Home() {
 
     // Initial setup
     const init = () => {
-        if (localStorage.getItem('theme') === 'dark') {
+        if (localStorage.getItem('theme') === 'dark' || 
+           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
         pickData = Array(hours.length).fill(0);
