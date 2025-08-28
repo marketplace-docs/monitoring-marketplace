@@ -380,13 +380,13 @@ export default function Home() {
                 },
                 datalabels: {
                     color: '#fff',
-                    anchor: 'center',
-                    align: 'center',
+                    anchor: 'end',
+                    align: 'top',
                     font: {
                         weight: 'bold'
                     },
                     formatter: (value) => {
-                        return value > 999 ? new Intl.NumberFormat('en-US').format(value) : '';
+                        return new Intl.NumberFormat('en-US').format(value);
                     }
                 }
               },
@@ -397,6 +397,7 @@ export default function Home() {
                     color: '#E5E7EB'
                   },
                   ticks: {
+                    color: '#3B82F6',
                     callback: function(value) {
                         return new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(Number(value));
                     }
@@ -405,6 +406,9 @@ export default function Home() {
                  x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                       color: '#3B82F6',
                     }
                  }
               }
@@ -615,11 +619,8 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
                         <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
-                    </div>
-                    <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-end gap-2 mb-4">
-                            <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <div className="flex items-center gap-2">
+                           <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
                            </button>
                             <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
@@ -629,6 +630,8 @@ export default function Home() {
                                 <Download size={14} /> Export
                             </button>
                         </div>
+                    </div>
+                    <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -687,7 +690,7 @@ export default function Home() {
                                 <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500">0</p>
                             </div>
                         </div>
-                        <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-md p-4" style={{background: 'linear-gradient(180deg, #1E293B 0%, #334155 100%)'}}>
+                        <div className="h-96 bg-white dark:bg-gray-800 rounded-md p-4">
                            <canvas id="backlog-chart"></canvas>
                         </div>
                       </div>
