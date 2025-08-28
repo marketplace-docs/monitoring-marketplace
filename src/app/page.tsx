@@ -518,19 +518,11 @@ export default function Home() {
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Grafik Backlog Marketplace Store</h3>
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
                                   <select id="backlog-filter" className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
                                     <option value="source">Marketplace Store</option>
                                     <option value="platform">Store Name</option>
                                     <option value="marketplace_platform">Platform</option>
                                   </select>
-                                  <button className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <Settings2 size={16} />
-                                  </button>
-                                </div>
-                                <div className="text-sm">
-                                    Total: <span id="backlog-total" className="font-semibold">0</span>
-                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-8 mb-4">
