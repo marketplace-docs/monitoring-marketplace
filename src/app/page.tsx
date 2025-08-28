@@ -491,26 +491,24 @@ export default function Home() {
     
     updateDashboard();
         
-    const setupCollapsible = (headerId: string, contentId: string) => {
-      const header = document.getElementById(headerId);
-      const icon = header?.querySelector('.chevron-icon');
-      const content = document.getElementById(contentId);
-      header?.addEventListener('click', (e) => {
-          // prevent header click from toggling when clicking on buttons inside
-          if ((e.target as HTMLElement).closest('button')) {
-            return;
-          }
-          const isHidden = content?.classList.toggle('hidden');
-          if (isHidden) {
-              icon?.classList.remove('rotate-90');
-          } else {
-              icon?.classList.add('rotate-90');
-          }
-      });
-    }
+    const setupCollapsible = (headerId: string, contentId: string, chevronId?: string) => {
+        const header = document.getElementById(headerId);
+        const icon = chevronId ? document.getElementById(chevronId) : header?.querySelector('.chevron-icon');
+        const content = document.getElementById(contentId);
+        
+        header?.addEventListener('click', (e) => {
+            if ((e.target as HTMLElement).closest('button, a, select')) {
+                return;
+            }
+            const isHidden = content?.classList.toggle('hidden');
+            if (icon) {
+                icon.classList.toggle('rotate-90', !isHidden);
+            }
+        });
+    };
 
     setupCollapsible('marketplace-performance-header', 'marketplace-performance-content');
-    setupCollapsible('backlog-header', 'backlog-content');
+    setupCollapsible('backlog-header', 'backlog-content', 'backlog-chevron');
     setupCollapsible('summary-pick-header', 'summary-pick-content');
     setupCollapsible('summary-pack-header', 'summary-pack-content');
     setupCollapsible('summary-ship-header', 'summary-ship-content');
@@ -620,11 +618,13 @@ export default function Home() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                     <div id="backlog-header" className="flex justify-between items-center p-4 cursor-pointer">
-                        <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
-                        <ChevronRight className="chevron-icon w-5 h-5 transition-transform" />
+                         <div className="flex items-center gap-2">
+                             <h2 className="text-lg font-semibold">Backlog Marketplace</h2>
+                         </div>
+                         <ChevronRight id="backlog-chevron" className="chevron-icon w-5 h-5 transition-transform" />
                     </div>
-                    <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex justify-end gap-2 mb-4">
+                    <div id="backlog-content" className="hidden p-4 pt-0 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-end gap-2 mb-4 mt-4">
                             <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
                             </button>
@@ -686,11 +686,11 @@ export default function Home() {
                         <div className="grid grid-cols-2 gap-4 mb-4 text-center">
                             <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Payment Accepted</p>
-                                <p id="chart-payment-accepted-value" className="text-2xl font-bold text-indigo-500">0</p>
+                                <p id="chart-payment-accepted-value" className="text-2xl font-bold text-indigo-500 dark:text-teal-400">0</p>
                             </div>
                             <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Marketplace Store</p>
-                                <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500">0</p>
+                                <p id="chart-marketplace-store-value" className="text-2xl font-bold text-indigo-500 dark:text-teal-400">0</p>
                             </div>
                         </div>
                         <div className="h-96 bg-white dark:bg-gray-800 rounded-md p-4">
