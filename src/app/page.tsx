@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useRef } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download, Pencil } from 'lucide-react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -638,6 +638,7 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Picker</p>
                             <div className="flex items-center gap-2">
                                 <User className="w-4 h-4 text-blue-500" />
+                                <Pencil className="w-3 h-3 text-gray-400" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -650,6 +651,7 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Packer</p>
                              <div className="flex items-center gap-2">
                                 <Package className="w-4 h-4 text-green-500" />
+                                <Pencil className="w-3 h-3 text-gray-400" />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -662,6 +664,7 @@ export default function Home() {
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Dispatcher</p>
                              <div className="flex items-center gap-2">
                                 <Truck className="w-4 h-4 text-blue-500" />
+                                <Pencil className="w-3 h-3 text-gray-400" />
                             </div>
                         </div>
                          <div className="flex items-center gap-2 mt-1">
@@ -850,3 +853,5 @@ export default function Home() {
     </>
   );
 }
+
+    
