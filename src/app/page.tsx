@@ -757,13 +757,15 @@ export default function Home() {
                 {id: 'shipped', title: 'Summary Ship', color: '#10b981'},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-                    <div className="flex flex-wrap justify-between items-center gap-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
+                    <div className="flex flex-wrap justify-between items-center gap-y-4" data-collapsible-trigger={`${sec.id}-content`}>
                         <div className="flex items-center gap-4">
                             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
-                            <span className={`text-sm font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
+                              <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
                            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
                                 <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="24" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
@@ -774,19 +776,23 @@ export default function Home() {
                                 <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronLeft size={16}/></button>
                                 <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronRight size={16}/></button>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">
-                                <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
-                            </button>
-                            <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow">
-                                <Download size={16} /> <span className="hidden sm:inline">Export</span>
-                            </button>
-                            <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                             <div className="flex items-center gap-2">
+                                <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">
+                                    <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                                </button>
+                                <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow">
+                                    <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                                </button>
+                                <div className="cursor-pointer">
+                                  <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id={`${sec.id}-content`} className="pt-6 hidden">
-                        <div id={`${sec.id}-input-container`} className="space-y-4"></div>
+                        <div className="overflow-x-auto pb-2">
+                            <div id={`${sec.id}-input-container`} className="space-y-4 min-w-[900px]"></div>
+                        </div>
                         <div className="mt-8 relative h-96">
                              <canvas id={`${sec.id}-chart`}></canvas>
                              <div className="flex justify-center items-center gap-4 mt-4">
@@ -838,4 +844,3 @@ export default function Home() {
   );
 }
 
-    
