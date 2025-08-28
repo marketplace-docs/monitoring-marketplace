@@ -335,6 +335,7 @@ export default function Home() {
           const labels = Object.keys(groupedData);
           const data = Object.values(groupedData);
           const maxDataValue = Math.max(...data);
+          const isDarkMode = document.documentElement.classList.contains('dark');
 
           const chartColors = [
               'rgba(59, 130, 246, 0.8)', 
@@ -380,7 +381,7 @@ export default function Home() {
                     }
                 },
                 datalabels: {
-                    color: '#000000',
+                    color: isDarkMode ? '#FFFFFF' : '#000000',
                     anchor: 'end',
                     align: 'top',
                     font: {
