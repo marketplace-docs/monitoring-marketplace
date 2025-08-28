@@ -303,8 +303,25 @@ export default function Home() {
           const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
           const filterValue = filterSelect ? filterSelect.value : 'platform';
           
-          const labels = backlogData.map(item => item[filterValue]);
-          const data = backlogData.map(item => parseInt(item.payment_order, 10));
+          const groupedData: { [key: string]: number } = {};
+
+          backlogData.forEach(item => {
+            let key;
+            if (filterValue === 'marketplace_platform') {
+              key = item.marketplace_platform;
+            } else {
+              key = item[filterValue];
+            }
+            
+            if (groupedData[key]) {
+              groupedData[key] += parseInt(item.payment_order, 10);
+            } else {
+              groupedData[key] = parseInt(item.payment_order, 10);
+            }
+          });
+
+          const labels = Object.keys(groupedData);
+          const data = Object.values(groupedData);
 
           backlogChartInstance = new Chart(backlogCtx, {
             type: 'bar',
@@ -490,7 +507,7 @@ export default function Home() {
                     </div>
                     <div id="backlog-content" className="hidden p-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex justify-end gap-2 mb-4">
-                           <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <button className="flex items-center gap-1 text-sm px-3 py-1.5 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                                <Pencil size={14} /> Edit
                            </button>
                             <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1 text-sm px-3 py-1.5 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">
