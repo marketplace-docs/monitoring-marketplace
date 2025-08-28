@@ -373,8 +373,8 @@ export default function Home() {
                 const div = document.createElement('div');
                 div.className = 'flex-none w-24 text-center';
                 div.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">${hour}</label>
-                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center" value="0" min="0">
+                    <label class="block text-sm text-gray-500 dark:text-gray-400">${hour}</label>
+                    <input type="number" data-index="${index}" class="${className} mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-center bg-transparent border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-indigo-500" value="0" min="0">
                 `;
                 container.appendChild(div);
             });
@@ -793,3 +793,5 @@ export default function Home() {
     </>
   );
 }
+
+    
