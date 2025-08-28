@@ -1,12 +1,21 @@
 
 "use client";
-import { useEffect, useRef } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download, Pencil } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download, Pencil, GripVertical } from 'lucide-react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 
 export default function Home() {
   const chartInstances = useRef<{ [key: string]: Chart }>({});
+  const [pickerCount, setPickerCount] = useState(0);
+  const [packerCount, setPackerCount] = useState(0);
+  const [dispatcherCount, setDispatcherCount] = useState(0);
+  const [_, setForceRender] = useState(0);
 
   useEffect(() => {
     Chart.register(ChartDataLabels);
@@ -210,9 +219,10 @@ export default function Home() {
         const totalPackOrder = packData.reduce((a, b) => a + b, 0);
         const totalShippedOrder = shippedData.reduce((a, b) => a + b, 0);
         const paymentOrders = backlogData.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
-        const pickerCount = parseInt((document.getElementById('picker-input') as HTMLInputElement).value, 10) || 0;
-        const packerCount = parseInt((document.getElementById('packer-input') as HTMLInputElement).value, 10) || 0;
-        const dispatcherCount = parseInt((document.getElementById('dispatcher-input') as HTMLInputElement).value, 10) || 0;
+        
+        const currentPickerCount = parseInt((document.getElementById('picker-count-display')?.textContent || '0'), 10);
+        const currentPackerCount = parseInt((document.getElementById('packer-count-display')?.textContent || '0'), 10);
+        const currentDispatcherCount = parseInt((document.getElementById('dispatcher-count-display')?.textContent || '0'), 10);
 
         const nonZeroPick = pickData.filter(v => v > 0).length || 1;
         const nonZeroPack = packData.filter(v => v > 0).length || 1;
@@ -224,9 +234,9 @@ export default function Home() {
         const targetPack = 525;
         const targetShipped = 515;
 
-        const performancePicker = pickerCount > 0 ? Math.min(100, ((totalPickOrder / pickerCount) / targetPick) * 100) : 0;
-        const performancePacker = packerCount > 0 ? Math.min(100, ((totalPackOrder / packerCount) / targetPack) * 100) : 0;
-        const performanceShipped = dispatcherCount > 0 ? Math.min(100, ((totalShippedOrder / dispatcherCount) / targetShipped) * 100) : 0;
+        const performancePicker = currentPickerCount > 0 ? Math.min(100, ((totalPickOrder / currentPickerCount) / targetPick) * 100) : 0;
+        const performancePacker = currentPackerCount > 0 ? Math.min(100, ((totalPackOrder / currentPackerCount) / targetPack) * 100) : 0;
+        const performanceShipped = currentDispatcherCount > 0 ? Math.min(100, ((totalShippedOrder / currentDispatcherCount) / targetShipped) * 100) : 0;
 
         const setText = (id: string, value: string | number) => {
             const el = document.getElementById(id);
@@ -239,9 +249,9 @@ export default function Home() {
         setText('payment-accepted-count', paymentOrders);
         setText('in-progress-orders', inProgressOrders);
         
-        setText('jumlah-picker-value', pickerCount);
-        setText('jumlah-packer-value', packerCount);
-        setText('jumlah-dispatcher-value', dispatcherCount);
+        setText('picker-count-display', pickerCount);
+        setText('packer-count-display', packerCount);
+        setText('dispatcher-count-display', dispatcherCount);
         
         setText('average-pick-per-hour', Math.round(totalPickOrder / nonZeroPick));
         setText('average-pack-per-hour', Math.round(totalPackOrder / nonZeroPack));
@@ -291,7 +301,7 @@ export default function Home() {
         const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
 
         const maxValue = Math.max(...data, 0);
-        const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25 / 100) * 100 : 1000;
+        const yAxisMax = maxValue > 0 ? Math.ceil(maxValue * 1.25) : 100;
         const stepSize = yAxisMax > 1000 ? 200 : 100;
 
         chartInstances.current[canvasId] = new Chart(ctx, {
@@ -386,15 +396,15 @@ export default function Home() {
         updateSummary();
         renderBacklogTable();
         renderAllCharts();
+        setForceRender(c => c + 1);
     };
 
     const createInputFields = () => {
         const create = (containerId: string, className: string, dataType: 'pick' | 'pack' | 'shipped') => {
             const container = document.getElementById(containerId);
             if (!container) return;
-            container.innerHTML = ''; // Clear previous content
+            container.innerHTML = ''; 
 
-            // Row 1: 00:00 - 11:00
             const row1 = document.createElement('div');
             row1.className = 'grid grid-cols-12 gap-x-2 gap-y-4';
             hours.slice(0, 12).forEach((hour, index) => {
@@ -408,7 +418,6 @@ export default function Home() {
             });
             container.appendChild(row1);
 
-            // Row 2: 12:00 - 23:00
             const row2 = document.createElement('div');
             row2.className = 'grid grid-cols-12 gap-x-2 gap-y-4 mt-4';
              hours.slice(12, 24).forEach((hour, i) => {
@@ -475,7 +484,7 @@ export default function Home() {
                 if (!contentId) return;
 
                 const targetEl = event.target as HTMLElement;
-                if (targetEl.closest('button, a, input, select')) {
+                if (targetEl.closest('button, a, input, select, [role="dialog"], [role="menu"]')) {
                     return;
                 }
 
@@ -498,27 +507,19 @@ export default function Home() {
             updateDashboard();
         });
 
-        const setupManpowerInput = (inputId: string, iconId: string) => {
-            const input = document.getElementById(inputId) as HTMLInputElement;
-            const icon = document.getElementById(iconId);
-            if (input && icon) {
-                input.readOnly = true; // Make it readonly by default
-                icon.addEventListener('click', () => {
-                    input.readOnly = false;
-                    input.focus();
-                });
-                input.addEventListener('blur', () => {
-                    input.readOnly = true;
-                    updateDashboard();
-                });
-                input.addEventListener('input', updateDashboard);
+        const handleManpowerSave = (type: 'picker' | 'packer' | 'dispatcher') => {
+            const input = document.getElementById(`${type}-input`) as HTMLInputElement;
+            if (input) {
+                const value = parseInt(input.value, 10) || 0;
+                if (type === 'picker') setPickerCount(value);
+                if (type === 'packer') setPackerCount(value);
+                if (type === 'dispatcher') setDispatcherCount(value);
+                document.getElementById(`${type}-dialog-close`)?.click();
+                setTimeout(updateDashboard, 0);
             }
         };
 
-        setupManpowerInput('picker-input', 'edit-picker');
-        setupManpowerInput('packer-input', 'edit-packer');
-        setupManpowerInput('dispatcher-input', 'edit-dispatcher');
-
+        (window as any).handleManpowerSave = handleManpowerSave;
 
         ['pick-start-hour', 'pick-end-hour', 'pack-start-hour', 'pack-end-hour', 
          'shipped-start-hour', 'shipped-end-hour'].forEach(id => {
@@ -559,7 +560,6 @@ export default function Home() {
         setupDataModeButton('chart-data-payment', 'payment', 'chart-data-count');
     };
 
-    // Initial setup
     const init = () => {
         if (localStorage.getItem('theme') === 'dark' || 
            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -579,11 +579,61 @@ export default function Home() {
     init();
 
     return () => {
-      // Cleanup charts on component unmount
       Object.values(chartInstances.current).forEach(chart => chart.destroy());
     };
 
   }, []);
+
+  const ManpowerCard = ({
+    type,
+    title,
+    icon,
+    count,
+  }: {
+    type: 'picker' | 'packer' | 'dispatcher';
+    title: string;
+    icon: React.ReactNode;
+    count: number;
+  }) => (
+    <Dialog>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
+        <div className="flex justify-between items-start">
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{title}</p>
+          <div className="flex items-center gap-2">
+            {icon}
+            <DialogTrigger asChild>
+              <Pencil className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
+            </DialogTrigger>
+          </div>
+        </div>
+        <div className="mt-1">
+          <p id={`${type}-count-display`} className="text-2xl font-bold text-gray-800 dark:text-gray-100">{count}</p>
+        </div>
+      </div>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit {title}</DialogTitle>
+          <DialogDescription>
+            Update the number of available {type}s. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${type}-input`} className="text-right">
+              Total
+            </Label>
+            <Input id={`${type}-input`} type="number" defaultValue={count} className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+            <DialogClose asChild>
+                <Button id={`${type}-dialog-close`} type="button" variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button type="button" onClick={() => (window as any).handleManpowerSave(type)}>Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <>
@@ -653,48 +703,10 @@ export default function Home() {
                     <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
                 </div>
                 <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 hidden">
-                    {/* Row 1 */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Picker</p>
-                            <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-blue-500" />
-                                <Pencil id="edit-picker" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                            <input type="number" id="picker-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
-                             <span id="jumlah-picker-value" className="hidden">0</span>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Packer</p>
-                             <div className="flex items-center gap-2">
-                                <Package className="w-4 h-4 text-green-500" />
-                                <Pencil id="edit-packer" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                             <input type="number" id="packer-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
-                             <span id="jumlah-packer-value" className="hidden">0</span>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
-                        <div className="flex justify-between items-start">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Jumlah Dispatcher</p>
-                             <div className="flex items-center gap-2">
-                                <Truck className="w-4 h-4 text-blue-500" />
-                                <Pencil id="edit-dispatcher" className="w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
-                            </div>
-                        </div>
-                         <div className="flex items-center gap-2 mt-1">
-                            <input type="number" id="dispatcher-input" defaultValue="0" className="w-full p-1 border-transparent dark:bg-gray-800 rounded-md text-left bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500 text-2xl font-bold text-gray-800 dark:text-gray-100" min="0" />
-                            <span id="jumlah-dispatcher-value" className="hidden">0</span>
-                        </div>
-                    </div>
-
-                    {/* Row 2 */}
+                    <ManpowerCard type="picker" title="Jumlah Picker" icon={<User className="w-4 h-4 text-blue-500" />} count={pickerCount} />
+                    <ManpowerCard type="packer" title="Jumlah Packer" icon={<Package className="w-4 h-4 text-green-500" />} count={packerCount} />
+                    <ManpowerCard type="dispatcher" title="Jumlah Dispatcher" icon={<Truck className="w-4 h-4 text-blue-500" />} count={dispatcherCount} />
+                    
                     <div id="card-performance-picker" className="p-4 rounded-lg flex justify-between items-center bg-slate-500 dark:bg-slate-700 text-white">
                         <div>
                             <p className="text-sm font-medium">Performance Picker</p>
@@ -717,7 +729,6 @@ export default function Home() {
                         <LineChart className="w-7 h-7 opacity-70" />
                     </div>
 
-                    {/* Row 3 */}
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700 flex justify-between items-center">
                         <div>
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Average Pick / Hour</p>
@@ -828,7 +839,7 @@ export default function Home() {
                         </div>
                     </div>
                     <div id={`${sec.id}-content`} className="pt-6 hidden">
-                        <div className="overflow-x-auto pb-2">
+                         <div className="overflow-x-auto pb-2">
                             <div id={`${sec.id}-input-container`} className="space-y-4 min-w-[900px]"></div>
                         </div>
                         <div className="mt-8 relative h-96">
