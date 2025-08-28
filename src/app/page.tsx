@@ -497,8 +497,8 @@ export default function Home() {
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
                                   <select id="backlog-filter" className="border rounded-md px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600">
-                                    <option value="platform">Store Name</option>
                                     <option value="source">Marketplace Store</option>
+                                    <option value="platform">Store Name</option>
                                     <option value="platform">Platform</option>
                                   </select>
                                   <button className="p-2 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
