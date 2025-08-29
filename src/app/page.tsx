@@ -954,9 +954,9 @@ export default function Home() {
       case 'pick':
         return <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
       case 'pack':
-        return <Package className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+        return <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
       case 'shipped':
-        return <Truck className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+        return <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
       default:
         return null;
     }
