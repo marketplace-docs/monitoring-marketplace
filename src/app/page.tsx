@@ -15,6 +15,7 @@ export default function Home() {
   const [pickerCount, setPickerCount] = useState(0);
   const [packerCount, setPackerCount] = useState(0);
   const [dispatcherCount, setDispatcherCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Backlog pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,12 +93,16 @@ export default function Home() {
     };
 
     if (!isInitialized.current) {
-        init();
+        setTimeout(() => {
+            setIsLoading(false);
+            init();
+        }, 3000);
         isInitialized.current = true;
     }
 
+
     return () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !isLoading) {
         Object.values(chartInstances.current).forEach(chart => {
             if (chart) {
                 chart.destroy();
@@ -110,10 +115,10 @@ export default function Home() {
 
   useEffect(() => {
     // This effect runs whenever the data or pagination settings change.
-    if (typeof window !== 'undefined' && isInitialized.current) {
+    if (typeof window !== 'undefined' && isInitialized.current && !isLoading) {
         updateDashboard();
     }
-  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogEdits, isEditingBacklog, backlogView]);
+  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogEdits, isEditingBacklog, backlogView, isLoading]);
 
   const generateHours = () => {
       const hours = [];
@@ -961,6 +966,17 @@ export default function Home() {
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
+        <ShoppingCart className="w-16 h-16 text-indigo-600 dark:text-indigo-400 animate-spin" />
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mt-6">
+          Marketplace Dashboard
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <>
