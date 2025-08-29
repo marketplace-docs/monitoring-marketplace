@@ -23,6 +23,7 @@ export default function Home() {
   const backlogData = useRef<any[]>([]);
   const [isEditingBacklog, setIsEditingBacklog] = useState(false);
   const [backlogEdits, setBacklogEdits] = useState<any[]>([]);
+  const [backlogView, setBacklogView] = useState('all-store');
 
   // These need to be refs to persist across re-renders without causing them
   const pickData = useRef<number[]>(Array(24).fill(0));
@@ -112,7 +113,7 @@ export default function Home() {
     if (typeof window !== 'undefined' && isInitialized.current) {
         updateDashboard();
     }
-  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogEdits, isEditingBacklog]);
+  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogEdits, isEditingBacklog, backlogView]);
 
   const generateHours = () => {
       const hours = [];
@@ -473,6 +474,8 @@ export default function Home() {
       const filteredShippedData = shippedData.current.slice(startShippedHour, endShippedHour + 1);
       renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
+      if (backlogView === 'detail-store') return;
+
       const dataToFilter = currentBacklogFilter.current;
       const groupedData = backlogData.current.reduce((acc, item) => {
           const key = item[dataToFilter];
@@ -634,8 +637,67 @@ export default function Home() {
     setBacklogEdits(newEdits);
   };
 
+  const renderBacklogDetailTable = () => {
+      const tableBody = document.getElementById('backlog-table-body');
+      if (!tableBody) return;
+      tableBody.innerHTML = '';
+
+      const detailData = backlogData.current.reduce((acc, item) => {
+        const platform = item.marketplacePlatform;
+        if (!acc[platform]) {
+          acc[platform] = {
+            totalPayment: 0,
+            color: ''
+          };
+        }
+        acc[platform].totalPayment += parseInt(item.payment_order, 10) || 0;
+        return acc;
+      }, {});
+
+      const platformColors: { [key: string]: string } = {
+          Shopee: 'bg-orange-400',
+          Lazada: 'bg-blue-500',
+          Tiktok: 'bg-gray-800',
+      };
+
+      const isDarkMode = document.documentElement.classList.contains('dark');
+
+       if(isDarkMode) {
+          platformColors.Tiktok = 'bg-gray-300 text-black';
+       }
+
+
+      Object.keys(detailData).forEach(platform => {
+          const row = document.createElement('tr');
+          row.className = 'dark:border-gray-700';
+          row.innerHTML = `
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <span class="px-3 py-1 rounded-full text-white ${platformColors[platform] || 'bg-gray-400'}">
+                      ${platform} Official Store
+                  </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">${detailData[platform].totalPayment.toLocaleString()}</td>
+          `;
+          tableBody.appendChild(row);
+      });
+  };
+
 
   const renderBacklogTable = () => {
+    if (backlogView === 'detail-store') {
+        const tableContainer = document.getElementById('backlog-table-container');
+        const detailContainer = document.getElementById('backlog-detail-container');
+        if(tableContainer) tableContainer.classList.add('hidden');
+        if(detailContainer) detailContainer.classList.remove('hidden');
+        renderBacklogDetailTable();
+        return;
+    }
+
+    const tableContainer = document.getElementById('backlog-table-container');
+    const detailContainer = document.getElementById('backlog-detail-container');
+    if(tableContainer) tableContainer.classList.remove('hidden');
+    if(detailContainer) detailContainer.classList.add('hidden');
+    
       const tableBody = document.getElementById('backlog-table-body');
       if (!tableBody) return;
       tableBody.innerHTML = '';
@@ -738,17 +800,31 @@ export default function Home() {
               element.addEventListener('input', updateDashboard);
           }
       });
+      
+      const backlogViewSelector = document.getElementById('backlog-view-selector');
+      if (backlogViewSelector) {
+        backlogViewSelector.addEventListener('change', (e) => {
+          setBacklogView((e.target as HTMLSelectElement).value);
+        });
+      }
 
-      document.getElementById('backlog-filter')?.addEventListener('change', (e) => {
-          currentBacklogFilter.current = (e.target as HTMLSelectElement).value;
-          updateDashboard();
-      });
+
+      const backlogFilter = document.getElementById('backlog-filter');
+      if (backlogFilter) {
+        backlogFilter.addEventListener('change', (e) => {
+            currentBacklogFilter.current = (e.target as HTMLSelectElement).value;
+            updateDashboard();
+        });
+      }
       
       const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment') => {
-          document.getElementById(buttonId)?.addEventListener('click', () => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+          button.addEventListener('click', () => {
               currentBacklogDataMode.current = dataMode;
               updateDashboard();
           });
+        }
       };
       setupDataModeButton('chart-data-count-new', 'count');
       setupDataModeButton('chart-data-payment-new', 'payment');
@@ -950,86 +1026,117 @@ export default function Home() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="backlog-content">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Backlog Marketplace</h2>
-                    <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                     <div className="flex items-center gap-4">
+                        <select id="backlog-view-selector" value={backlogView} onChange={(e) => setBacklogView(e.target.value)} className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all-store">MP All-Store</option>
+                            <option value="detail-store">MP Detail Store</option>
+                        </select>
+                        <div className="flex items-center gap-2">
+                           {backlogView === 'all-store' && (
+                            <>
+                              {isEditingBacklog ? (
+                                  <>
+                                      <Button onClick={handleAddBacklogRow} variant="outline" size="sm" className="flex items-center gap-1.5">
+                                          <PlusCircle size={16} /> Add Row
+                                      </Button>
+                                      <Button onClick={handleSaveBacklog} size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5">
+                                          Save
+                                      </Button>
+                                      <Button onClick={handleToggleEditBacklog} variant="destructive" size="sm" className="flex items-center gap-1.5">
+                                          Cancel
+                                      </Button>
+                                  </>
+                              ) : (
+                                  <>
+                                      <Button onClick={handleToggleEditBacklog} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
+                                          <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
+                                      </Button>
+                                      <Button onClick={() => (window as any).uploadBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                                          <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                                      </Button>
+                                      <Button onClick={() => (window as any).exportBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                                          <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                                      </Button>
+                                  </>
+                              )}
+                            </>
+                           )}
+                        </div>
+                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                    </div>
                 </div>
                 <div id="backlog-content" className="pt-6 hidden">
-                    <div className="flex justify-end mb-4">
-                        <div className="flex items-center gap-2">
-                            {isEditingBacklog ? (
-                                <>
-                                    <Button onClick={handleAddBacklogRow} variant="outline" size="sm" className="flex items-center gap-1.5">
-                                        <PlusCircle size={16} /> Add Row
-                                    </Button>
-                                    <Button onClick={handleSaveBacklog} size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5">
-                                        Save
-                                    </Button>
-                                    <Button onClick={handleToggleEditBacklog} variant="destructive" size="sm" className="flex items-center gap-1.5">
-                                        Cancel
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Button onClick={handleToggleEditBacklog} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
-                                        <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
-                                    </Button>
-                                    <Button onClick={() => (window as any).uploadBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
-                                        <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
-                                    </Button>
-                                    <Button onClick={() => (window as any).exportBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
-                                        <Download size={16} /> <span className="hidden sm:inline">Export</span>
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full">
-                            <thead className="border-b border-gray-200 dark:border-gray-700">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Store Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
-                                    {isEditingBacklog && <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>}
-                                </tr>
-                            </thead>
-                            <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
-                        <div className="flex items-center gap-2">
-                            <span>Records per page:</span>
-                            <select id="backlog-records-per-page" defaultValue={recordsPerPage} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="30">30</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <span id="pagination-info">1-10 of 31</span>
-                            <div className="flex items-center gap-1">
-                                <button id="first-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <ChevronsLeft size={20} />
-                                </button>
-                                <button id="prev-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <button id="next-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <ChevronRight size={20} />
-                                </button>
-                                <button id="last-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <ChevronsRight size={20} />
-                                </button>
-                            </div>
-                        </div>
+                   
+                    <div id="backlog-table-container">
+                      <div className="overflow-x-auto">
+                          <table className="min-w-full">
+                              <thead className="border-b border-gray-200 dark:border-gray-700">
+                                  <tr>
+                                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Store Name</th>
+                                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
+                                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
+                                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+                                      {isEditingBacklog && <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>}
+                                  </tr>
+                              </thead>
+                              <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
+                              </tbody>
+                          </table>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
+                          <div className="flex items-center gap-2">
+                              <span>Records per page:</span>
+                              <select id="backlog-records-per-page" defaultValue={recordsPerPage} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
+                                  <option value="5">5</option>
+                                  <option value="10">10</option>
+                                  <option value="30">30</option>
+                                  <option value="100">100</option>
+                              </select>
+                          </div>
+                          <div className="flex items-center gap-4">
+                              <span id="pagination-info">1-10 of 31</span>
+                              <div className="flex items-center gap-1">
+                                  <button id="first-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                      <ChevronsLeft size={20} />
+                                  </button>
+                                  <button id="prev-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                      <ChevronLeft size={20} />
+                                  </button>
+                                  <button id="next-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                      <ChevronRight size={20} />
+                                  </button>
+                                  <button id="last-page-btn" className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                      <ChevronsRight size={20} />
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col mt-6">
+                    <div id="backlog-detail-container" className="hidden">
+                         <div className="grid grid-cols-2 gap-8">
+                             <div>
+                                 <h3 className="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Platform</h3>
+                                  <table className="min-w-full">
+                                      <tbody id="backlog-detail-table" className="divide-y divide-gray-200 dark:divide-gray-700">
+                                      </tbody>
+                                  </table>
+                             </div>
+                             <div className="flex justify-center">
+                                  <div className="w-full max-w-md">
+                                     <h3 className="font-semibold text-lg mb-4 text-center text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
+                                     <div className="w-full h-80 mt-4">
+                                         <canvas id="backlog-chart"></canvas>
+                                     </div>
+                                  </div>
+                             </div>
+                         </div>
+                    </div>
+
+                    <div className="flex flex-col mt-6" style={{ display: backlogView === 'all-store' ? 'flex' : 'none' }}>
                         <div className="flex justify-between items-center w-full mb-4">
-                            <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-2">
                                 <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
                                 <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
                             </div>
@@ -1052,7 +1159,7 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="w-full h-80 mt-4">
-                            <canvas id="backlog-chart"></canvas>
+                            <canvas id="backlog-chart-all-store"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1072,7 +1179,7 @@ export default function Home() {
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                             </div>
                         </div>
-                        <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                     <div id={`${sec.id}-content`} className="pt-6 hidden">
                        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap justify-between mb-6">
@@ -1141,5 +1248,3 @@ export default function Home() {
     </>
   );
 }
-
-    
