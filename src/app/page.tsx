@@ -31,62 +31,64 @@ export default function Home() {
 
   useEffect(() => {
     // This effect runs only once on the client side after mounting.
-    Chart.register(ChartDataLabels);
-
     const init = () => {
-        if (localStorage.getItem('theme') === 'dark' || 
-           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
+        if (typeof window !== 'undefined') {
+            if (localStorage.getItem('theme') === 'dark' || 
+               (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
 
-        const initialBacklogData = [
-            { source: "Jung Saem Mool Official Store", platform: "Shopee Jung Saem Mool", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Amuse Official Store", platform: "Shopee Amuse", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Carasun.id Official Store", platform: "Shopee Carasun", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Ariul Official Store", platform: "Shopee Ariul", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Dr G Official Store", platform: "Shopee Dr G", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Im From Official Store", platform: "Shopee Im From", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "COSRX Official Store", platform: "Shopee COSRX", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Espoir Official Store", platform: "Shopee Espoir", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Mediheal Official Store", platform: "Shopee Mediheal", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Keana Official Store", platform: "Shopee Keana", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Lilla Baby Indonesia", platform: "Shopee Lilla Baby", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Lilla Official store", platform: "Shopee lilla", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Edit by Sociolla", platform: "Shopee", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Round Lab Official Store", platform: "Shopee Round Lab", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Speak To Me Official Store", platform: "Shopee Speak to me", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Sukin Official Store", platform: "Shopee Sukin", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Woshday Official Store", platform: "Shopee Woshday", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Gemistry Official Store", platform: "Shopee Gemistry", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Sungboon Editor Official Store", platform: "Shopee Sungboon Editor", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Derma Angel Official Store", platform: "Shopee Derma Angel", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "UIQ Official Store", platform: "Shopee UIQ", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "UB Mom Indonesia", platform: "Shopee UB Mom", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "Bioheal Official Store", platform: "Shopee Bioheal", payment_order: "0", marketplacePlatform: "Shopee" },
-            { source: "COSRX Official Store", platform: "Lazada Cosrx", payment_order: "0", marketplacePlatform: "Lazada" },
-            { source: "Lilla Official store", platform: "tiktok_lilla", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "COSRX Official Store", platform: "tiktok_cosrx", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "Carasun.id Official Store", platform: "tiktok_carasun", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "Derma Angel Official Store", platform: "tiktok_derma_angel", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "Lilla Baby Indonesia", platform: "tiktok_lilla_Baby", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "Edit by Sociolla", platform: "tiktok", payment_order: "0", marketplacePlatform: "Tiktok" },
-            { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0", marketplacePlatform: "Tiktok" },
-        ];
-        
-        setBacklogData(initialBacklogData);
-        
-        // All DOM interactions and event listener setups must be here.
-        createInputFields();
-        setupCollapsible();
-        setupEventListeners(initialBacklogData);
-        
-        // Initial render
-        updateDashboard();
+            const initialBacklogData = [
+                { source: "Jung Saem Mool Official Store", platform: "Shopee Jung Saem Mool", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Amuse Official Store", platform: "Shopee Amuse", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Carasun.id Official Store", platform: "Shopee Carasun", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Ariul Official Store", platform: "Shopee Ariul", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Dr G Official Store", platform: "Shopee Dr G", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Im From Official Store", platform: "Shopee Im From", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "COSRX Official Store", platform: "Shopee COSRX", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Espoir Official Store", platform: "Shopee Espoir", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Mediheal Official Store", platform: "Shopee Mediheal", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Keana Official Store", platform: "Shopee Keana", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Lilla Baby Indonesia", platform: "Shopee Lilla Baby", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Lilla Official store", platform: "Shopee lilla", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Edit by Sociolla", platform: "Shopee", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Round Lab Official Store", platform: "Shopee Round Lab", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Speak To Me Official Store", platform: "Shopee Speak to me", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Sukin Official Store", platform: "Shopee Sukin", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Woshday Official Store", platform: "Shopee Woshday", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Gemistry Official Store", platform: "Shopee Gemistry", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Sungboon Editor Official Store", platform: "Shopee Sungboon Editor", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Derma Angel Official Store", platform: "Shopee Derma Angel", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "UIQ Official Store", platform: "Shopee UIQ", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "UB Mom Indonesia", platform: "Shopee UB Mom", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "Bioheal Official Store", platform: "Shopee Bioheal", payment_order: "0", marketplacePlatform: "Shopee" },
+                { source: "COSRX Official Store", platform: "Lazada Cosrx", payment_order: "0", marketplacePlatform: "Lazada" },
+                { source: "Lilla Official store", platform: "tiktok_lilla", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "COSRX Official Store", platform: "tiktok_cosrx", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "Carasun.id Official Store", platform: "tiktok_carasun", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "Derma Angel Official Store", platform: "tiktok_derma_angel", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "Lilla Baby Indonesia", platform: "tiktok_lilla_Baby", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "Edit by Sociolla", platform: "tiktok", payment_order: "0", marketplacePlatform: "Tiktok" },
+                { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0", marketplacePlatform: "Tiktok" },
+            ];
+            
+            setBacklogData(initialBacklogData);
+            
+            // All DOM interactions and event listener setups must be here.
+            Chart.register(ChartDataLabels);
+            createInputFields();
+            setupCollapsible();
+            setupEventListeners(initialBacklogData);
+            
+            // Initial render
+            updateDashboard();
+        }
     };
 
     init();
 
     return () => {
+      if (typeof window !== 'undefined') {
         // Cleanup charts
         Object.values(chartInstances.current).forEach(chart => {
             if (chart) {
@@ -94,13 +96,14 @@ export default function Home() {
             }
         });
         chartInstances.current = {};
+      }
     };
   }, []);
 
   useEffect(() => {
     // This effect runs whenever the data or pagination settings change.
     // It's responsible for re-rendering the dashboard components.
-    if (Object.keys(chartInstances.current).length > 0) {
+    if (typeof window !== 'undefined') {
         updateDashboard();
     }
   }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogData]);
@@ -586,10 +589,14 @@ export default function Home() {
   
       // Update pagination buttons state
       const totalPages = Math.ceil(backlogData.length / recordsPerPage);
-      (document.getElementById('first-page-btn') as HTMLButtonElement).disabled = currentPage === 1;
-      (document.getElementById('prev-page-btn') as HTMLButtonElement).disabled = currentPage === 1;
-      (document.getElementById('next-page-btn') as HTMLButtonElement).disabled = currentPage === totalPages;
-      (document.getElementById('last-page-btn') as HTMLButtonElement).disabled = currentPage === totalPages;
+      const firstPageBtn = document.getElementById('first-page-btn') as HTMLButtonElement | null;
+      if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
+      const prevPageBtn = document.getElementById('prev-page-btn') as HTMLButtonElement | null;
+      if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+      const nextPageBtn = document.getElementById('next-page-btn') as HTMLButtonElement | null;
+      if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
+      const lastPageBtn = document.getElementById('last-page-btn') as HTMLButtonElement | null;
+      if (lastPageBtn) lastPageBtn.disabled = currentPage === totalPages;
   };
   
   const setupCollapsible = () => {
@@ -851,17 +858,19 @@ export default function Home() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="backlog-content">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Backlog Marketplace</h2>
-                     <div className="flex items-center gap-2">
-                        <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
-                            <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
-                        </button>
-                        <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
-                            <Download size={16} /> <span className="hidden sm:inline">Export</span>
-                        </button>
-                        <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
-                    </div>
+                    <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                 </div>
                 <div id="backlog-content" className="grid grid-cols-1 gap-6 mt-4 hidden">
+                    <div className="flex justify-end mb-4">
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                                <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                            </button>
+                            <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                                <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                            </button>
+                        </div>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -949,9 +958,7 @@ export default function Home() {
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                           <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
-                        </div>
+                        <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                     <div id={`${sec.id}-content`} className="pt-6 hidden">
                         <div className="flex items-center gap-x-4 gap-y-2 flex-wrap justify-between mb-6">
