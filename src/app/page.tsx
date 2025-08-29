@@ -474,7 +474,16 @@ export default function Home() {
       const filteredShippedData = shippedData.current.slice(startShippedHour, endShippedHour + 1);
       renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
-      if (backlogView === 'detail-store') return;
+      if (backlogView === 'detail-store') {
+          // In detail view, we don't render the main backlog chart.
+          // Or perhaps we render a different one, for now, let's just not render it.
+          const chartCanvas = document.getElementById('backlog-chart-all-store') as HTMLCanvasElement;
+          if (chartCanvas && chartInstances.current['backlog-chart-all-store']) {
+              chartInstances.current['backlog-chart-all-store'].destroy();
+              delete chartInstances.current['backlog-chart-all-store'];
+          }
+          return;
+      }
 
       const dataToFilter = currentBacklogFilter.current;
       const groupedData = backlogData.current.reduce((acc, item) => {
@@ -516,7 +525,7 @@ export default function Home() {
         const filterTitleEl = document.getElementById('backlog-chart-title-filter');
         if (filterTitleEl) filterTitleEl.textContent = selectedOption.text;
       }
-      renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, backlogColors);
+      renderChart('backlog-chart-all-store', 'bar', backlogLabels, backlogValues, chartLabel, backlogColors);
       
       // Update active state for new filter buttons
       const countButton = document.getElementById('chart-data-count-new');
@@ -638,9 +647,15 @@ export default function Home() {
   };
 
   const renderBacklogDetailTable = () => {
-      const tableBody = document.getElementById('backlog-table-body');
-      if (!tableBody) return;
-      tableBody.innerHTML = '';
+      const detailContainer = document.getElementById('backlog-detail-container');
+      if (!detailContainer) return;
+      detailContainer.innerHTML = '';
+  
+      const table = document.createElement('table');
+      table.className = "min-w-full divide-y divide-gray-200 dark:divide-gray-700";
+      const tbody = document.createElement('tbody');
+      tbody.className = "bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700";
+      table.appendChild(tbody);
 
       const detailData = backlogData.current.reduce((acc, item) => {
         const platform = item.marketplacePlatform;
@@ -678,8 +693,9 @@ export default function Home() {
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">${detailData[platform].totalPayment.toLocaleString()}</td>
           `;
-          tableBody.appendChild(row);
+          tbody.appendChild(row);
       });
+      detailContainer.appendChild(table);
   };
 
 
@@ -687,16 +703,20 @@ export default function Home() {
     if (backlogView === 'detail-store') {
         const tableContainer = document.getElementById('backlog-table-container');
         const detailContainer = document.getElementById('backlog-detail-container');
+        const chartContainer = document.getElementById('backlog-chart-container');
         if(tableContainer) tableContainer.classList.add('hidden');
         if(detailContainer) detailContainer.classList.remove('hidden');
+        if(chartContainer) chartContainer.classList.add('hidden');
         renderBacklogDetailTable();
         return;
     }
 
     const tableContainer = document.getElementById('backlog-table-container');
     const detailContainer = document.getElementById('backlog-detail-container');
+    const chartContainer = document.getElementById('backlog-chart-container');
     if(tableContainer) tableContainer.classList.remove('hidden');
     if(detailContainer) detailContainer.classList.add('hidden');
+    if(chartContainer) chartContainer.classList.remove('hidden');
     
       const tableBody = document.getElementById('backlog-table-body');
       if (!tableBody) return;
@@ -1031,7 +1051,13 @@ export default function Home() {
                             <option value="all-store">MP All-Store</option>
                             <option value="detail-store">MP Detail Store</option>
                         </select>
-                        <div className="flex items-center gap-2">
+                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                    </div>
+                </div>
+                <div id="backlog-content" className="pt-6 hidden">
+                    <div id="backlog-table-container">
+                       <div className="flex justify-end mb-4">
+                         <div className="flex items-center gap-2">
                            {backlogView === 'all-store' && (
                             <>
                               {isEditingBacklog ? (
@@ -1061,13 +1087,8 @@ export default function Home() {
                               )}
                             </>
                            )}
-                        </div>
-                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
-                    </div>
-                </div>
-                <div id="backlog-content" className="pt-6 hidden">
-                   
-                    <div id="backlog-table-container">
+                         </div>
+                       </div>
                       <div className="overflow-x-auto">
                           <table className="min-w-full">
                               <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -1115,26 +1136,10 @@ export default function Home() {
                     </div>
 
                     <div id="backlog-detail-container" className="hidden">
-                         <div className="grid grid-cols-2 gap-8">
-                             <div>
-                                 <h3 className="font-semibold text-lg mb-2 text-gray-800 dark:text-gray-200">Platform</h3>
-                                  <table className="min-w-full">
-                                      <tbody id="backlog-detail-table" className="divide-y divide-gray-200 dark:divide-gray-700">
-                                      </tbody>
-                                  </table>
-                             </div>
-                             <div className="flex justify-center">
-                                  <div className="w-full max-w-md">
-                                     <h3 className="font-semibold text-lg mb-4 text-center text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                                     <div className="w-full h-80 mt-4">
-                                         <canvas id="backlog-chart"></canvas>
-                                     </div>
-                                  </div>
-                             </div>
-                         </div>
+                         {/* This container will be populated by renderBacklogDetailTable */}
                     </div>
 
-                    <div className="flex flex-col mt-6" style={{ display: backlogView === 'all-store' ? 'flex' : 'none' }}>
+                    <div id="backlog-chart-container" className="flex flex-col mt-6">
                         <div className="flex justify-between items-center w-full mb-4">
                              <div className="flex items-center gap-2">
                                 <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
