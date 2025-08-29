@@ -391,7 +391,7 @@ export default function Home() {
         const endShippedHour = parseInt((document.getElementById('shipped-end-hour') as HTMLInputElement).value, 10);
         const filteredShippedHours = hours.slice(startShippedHour, endShippedHour + 1);
         const filteredShippedData = shippedData.slice(startShippedHour, endShippedHour + 1);
-        renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#10b981');
+        renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
         // Backlog Chart
         const dataToFilter = currentBacklogFilter === 'platform' ? 'platform' : 'source';
@@ -824,9 +824,9 @@ export default function Home() {
             </div>
             
             {[
-                {id: 'pick', title: 'Summary Pick', color: '#ef4444', legend: 'Jumlah Order Pick'},
-                {id: 'pack', title: 'Summary Pack', color: '#f59e0b', legend: 'Jumlah Order Pack'},
-                {id: 'shipped', title: 'Summary Ship', color: '#10b981', legend: 'Jumlah Order Ship'},
+                {id: 'pick', title: 'Summary Pick', color: '#ef4444'},
+                {id: 'pack', title: 'Summary Pack', color: '#f59e0b'},
+                {id: 'shipped', title: 'Summary Ship', color: '#8b5cf6'},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-y-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
@@ -908,5 +908,3 @@ export default function Home() {
     </>
   );
 }
-
-    
