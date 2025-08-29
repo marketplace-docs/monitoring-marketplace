@@ -932,21 +932,17 @@ export default function Home() {
                     </div>
 
                     <div className="flex flex-col mt-6">
-                        <div className="flex justify-between items-center w-full mb-4 gap-4">
-                            <div className="flex-1 justify-start">
-                                <div className="flex items-center gap-2">
-                                    <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                                    <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
-                                </div>
+                        <div className="flex justify-between items-center w-full mb-4">
+                            <div className="flex items-center gap-2">
+                                <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
+                                <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
                             </div>
-                            <div className="flex flex-1 justify-center items-center gap-4">
+                            <div className="flex items-center gap-4">
                                 <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="platform">Store Name</option>
                                     <option value="source">Marketplace</option>
                                     <option value="marketplacePlatform">Platform</option>
                                 </select>
-                            </div>
-                            <div className="flex flex-1 justify-end">
                                 <div className="text-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <div id="chart-data-count-new" className="flex justify-between items-center gap-8 px-4 py-2 cursor-pointer border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                         <span>Marketplace Store</span>
@@ -1049,4 +1045,3 @@ export default function Home() {
     </>
   );
 }
-
