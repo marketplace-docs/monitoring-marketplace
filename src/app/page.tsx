@@ -1056,18 +1056,15 @@ export default function Home() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center cursor-pointer" data-collapsible-trigger="backlog-content">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Backlog Marketplace</h2>
-                     <div className="flex items-center gap-4">
+                    <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
+                </div>
+                <div id="backlog-content" className="pt-6 hidden">
+                    <div className="flex justify-between items-center mb-4">
                         <select id="backlog-view-selector" value={backlogView} onChange={(e) => setBacklogView(e.target.value)} className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="all-store">MP All-Store</option>
                             <option value="detail-store">MP Detail Store</option>
                         </select>
-                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
-                    </div>
-                </div>
-                <div id="backlog-content" className="pt-6 hidden">
-                    <div id="backlog-table-container">
-                       <div className="flex justify-end mb-4">
-                         <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                            {backlogView === 'all-store' && (
                             <>
                               {isEditingBacklog ? (
@@ -1098,7 +1095,8 @@ export default function Home() {
                             </>
                            )}
                          </div>
-                       </div>
+                    </div>
+                    <div id="backlog-table-container">
                       <div className="overflow-x-auto">
                           <table className="min-w-full">
                               <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -1263,4 +1261,5 @@ export default function Home() {
     </>
   );
 }
+
 
