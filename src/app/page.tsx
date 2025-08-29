@@ -1082,7 +1082,7 @@ export default function Home() {
                                 <option value="all-store">MP All-Store</option>
                                 <option value="detail-store">MP Detail Store</option>
                             </select>
-                            {backlogView === 'detail-store' && !isEditingBacklog && (
+                            {backlogView === 'detail-store' && (
                                 <Button onClick={() => {
                                   setBacklogView('all-store');
                                   handleToggleEditBacklog();
@@ -1202,9 +1202,9 @@ export default function Home() {
             </div>
             
             {[
-                {id: 'pick', title: 'Summary Pick', color: '#ef4444'},
-                {id: 'pack', title: 'Summary Pack', color: '#f59e0b'},
-                {id: 'shipped', title: 'Summary Ship', color: '#8b5cf6'},
+                {id: 'pick', title: 'Summary Pick', manpower: pickerCount},
+                {id: 'pack', title: 'Summary Pack', manpower: packerCount},
+                {id: 'shipped', title: 'Summary Ship', manpower: dispatcherCount},
             ].map(sec => (
                 <div key={sec.id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center gap-y-4 cursor-pointer" data-collapsible-trigger={`${sec.id}-content`}>
@@ -1213,6 +1213,10 @@ export default function Home() {
                             <div className="flex items-baseline gap-2">
                               <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">Manpower:</span>
+                              <span className={`text-lg font-bold text-gray-800 dark:text-gray-100`}>{sec.manpower}</span>
                             </div>
                         </div>
                          <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
