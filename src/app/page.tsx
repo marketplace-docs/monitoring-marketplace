@@ -498,9 +498,23 @@ export default function Home() {
         if (filterTitleEl) filterTitleEl.textContent = selectedOption.text;
       }
       renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, backlogColors);
+      
+      // Update active state for new filter buttons
+      const countButton = document.getElementById('chart-data-count-new');
+      const paymentButton = document.getElementById('chart-data-payment-new');
+      if (countButton && paymentButton) {
+        if (currentBacklogDataMode.current === 'count') {
+            countButton.classList.add('bg-indigo-100', 'dark:bg-indigo-900/50');
+            paymentButton.classList.remove('bg-indigo-100', 'dark:bg-indigo-900/50');
+        } else {
+            paymentButton.classList.add('bg-indigo-100', 'dark:bg-indigo-900/50');
+            countButton.classList.remove('bg-indigo-100', 'dark:bg-indigo-900/50');
+        }
+      }
   };
 
   const updateDashboard = () => {
+      if (typeof window === 'undefined') return;
       updateInputFieldsValues();
       updateSummary();
       renderBacklogTable();
@@ -657,21 +671,16 @@ export default function Home() {
           currentBacklogFilter.current = (e.target as HTMLSelectElement).value;
           updateDashboard();
       });
-
-      const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment', otherButtonId: string) => {
+      
+      const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment') => {
           document.getElementById(buttonId)?.addEventListener('click', () => {
               currentBacklogDataMode.current = dataMode;
               updateDashboard();
-              document.getElementById(buttonId)?.classList.replace('bg-gray-200', 'bg-indigo-600');
-              document.getElementById(buttonId)?.classList.replace('dark:bg-gray-700', 'dark:bg-indigo-500');
-              document.getElementById(buttonId)?.classList.add('text-white');
-              document.getElementById(otherButtonId)?.classList.replace('bg-indigo-600', 'bg-gray-200');
-              document.getElementById(otherButtonId)?.classList.replace('dark:bg-indigo-500', 'dark:bg-gray-700');
-              document.getElementById(otherButtonId)?.classList.remove('text-white');
           });
       };
-      setupDataModeButton('chart-data-count', 'count', 'chart-data-payment');
-      setupDataModeButton('chart-data-payment', 'payment', 'chart-data-count');
+      setupDataModeButton('chart-data-count-new', 'count');
+      setupDataModeButton('chart-data-payment-new', 'payment');
+
       
       const recordsPerPageSelect = document.getElementById('backlog-records-per-page');
       if (recordsPerPageSelect) {
@@ -896,7 +905,7 @@ export default function Home() {
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
                         <div className="flex items-center gap-2">
                             <span>Records per page:</span>
-                            <select id="backlog-records-per-page" defaultValue={recordsPerPage} onChange={(e) => { setRecordsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
+                            <select id="backlog-records-per-page" defaultValue={recordsPerPage} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
                                 <option value="5">5</option>
                                 <option value="10">10</option>
                                 <option value="30">30</option>
@@ -923,35 +932,31 @@ export default function Home() {
                     </div>
 
                     <div className="flex flex-col mt-6">
-                        <div className="flex justify-between items-center w-full mb-4">
+                        <div className="flex justify-between items-center w-full mb-4 gap-4">
                             <div className="flex-1 justify-start">
                                 <div className="flex items-center gap-2">
                                     <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
                                     <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
                                 </div>
                             </div>
-                            <div className="flex flex-1 justify-center items-center gap-4 flex-wrap">
+                            <div className="flex flex-1 justify-center items-center gap-4">
                                 <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="platform">Store Name</option>
                                     <option value="source">Marketplace</option>
                                     <option value="marketplacePlatform">Platform</option>
                                 </select>
-                                <div className="flex rounded-md shadow-sm">
-                                <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
-                                <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
-                                </div>
                             </div>
-                            <div className="flex flex-1 justify-end items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-                               <div className="w-48 text-gray-800 dark:text-gray-200">
-                                   <div className="flex justify-between">
-                                       <span>Marketplace Store</span>
-                                       <span id="total-store-count" className="font-semibold">0</span>
-                                   </div>
-                                   <div className="flex justify-between">
+                            <div className="flex flex-1 justify-end">
+                                <div className="text-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <div id="chart-data-count-new" className="flex justify-between items-center gap-8 px-4 py-2 cursor-pointer border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        <span>Marketplace Store</span>
+                                        <span id="total-store-count" className="font-semibold">0</span>
+                                    </div>
+                                    <div id="chart-data-payment-new" className="flex justify-between items-center gap-8 px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                         <span>Payment Accepted</span>
                                         <span id="total-payment-order" className="font-semibold">0</span>
-                                   </div>
-                               </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="w-full h-80 mt-4">
