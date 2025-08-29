@@ -612,8 +612,10 @@ export default function Home() {
   
   const handleBacklogEditChange = (index: number, field: string, value: string) => {
     const newEdits = [...backlogEdits];
-    newEdits[index][field] = value;
-    setBacklogEdits(newEdits);
+    if (newEdits[index]) {
+      newEdits[index][field] = value;
+      setBacklogEdits(newEdits);
+    }
   };
 
   const handleToggleEditBacklog = () => {
@@ -627,11 +629,6 @@ export default function Home() {
       setIsEditingBacklog(true);
     }
   };
-
-  const handleEditDetailStore = () => {
-    setBacklogView('all-store');
-    handleToggleEditBacklog();
-  }
   
   const handleSaveBacklog = () => {
     backlogData.current = backlogEdits;
@@ -719,9 +716,11 @@ export default function Home() {
         const tableContainer = document.getElementById('backlog-table-container');
         const detailContainer = document.getElementById('backlog-detail-container');
         const chartContainer = document.getElementById('backlog-chart-container');
+        const controlsContainer = document.getElementById('backlog-controls-container');
         if(tableContainer) tableContainer.classList.add('hidden');
         if(detailContainer) detailContainer.classList.remove('hidden');
         if(chartContainer) chartContainer.classList.add('hidden');
+        if(controlsContainer) controlsContainer.classList.add('hidden');
         renderBacklogDetailTable();
         return;
     }
@@ -729,9 +728,11 @@ export default function Home() {
     const tableContainer = document.getElementById('backlog-table-container');
     const detailContainer = document.getElementById('backlog-detail-container');
     const chartContainer = document.getElementById('backlog-chart-container');
+    const controlsContainer = document.getElementById('backlog-controls-container');
     if(tableContainer) tableContainer.classList.remove('hidden');
     if(detailContainer) detailContainer.classList.add('hidden');
     if(chartContainer) chartContainer.classList.remove('hidden');
+    if(controlsContainer) controlsContainer.classList.remove('hidden');
     
       const tableBody = document.getElementById('backlog-table-body');
       if (!tableBody) return;
@@ -749,17 +750,32 @@ export default function Home() {
           row.className = 'dark:border-gray-700';
 
           if (isEditingBacklog) {
-            row.innerHTML = `
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.platform}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'platform', this.value)"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" type="number" value="${item.payment_order}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'payment_order', this.value)"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.source}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'source', this.value)"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.marketplacePlatform}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'marketplacePlatform', this.value)"></td>
-              <td class="px-3 py-2 text-center">
-                <button class="text-red-500 hover:text-red-700" onclick="handleDeleteBacklogRowWrapper(${originalIndex})">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                </button>
-              </td>
-            `;
+            const createInputCell = (field: string, type: string, value: string) => {
+                const cell = document.createElement('td');
+                cell.className = "px-3 py-2";
+                const input = document.createElement('input');
+                input.className = "w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600";
+                input.type = type;
+                input.value = value;
+                input.onchange = (e) => handleBacklogEditChange(originalIndex, field, (e.target as HTMLInputElement).value);
+                cell.appendChild(input);
+                return cell;
+            };
+
+            row.appendChild(createInputCell('platform', 'text', item.platform));
+            row.appendChild(createInputCell('payment_order', 'number', item.payment_order));
+            row.appendChild(createInputCell('source', 'text', item.source));
+            row.appendChild(createInputCell('marketplacePlatform', 'text', item.marketplacePlatform));
+            
+            const actionCell = document.createElement('td');
+            actionCell.className = "px-3 py-2 text-center";
+            const deleteButton = document.createElement('button');
+            deleteButton.className = "text-red-500 hover:text-red-700";
+            deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
+            deleteButton.onclick = () => handleDeleteBacklogRow(originalIndex);
+            actionCell.appendChild(deleteButton);
+            row.appendChild(actionCell);
+
           } else {
             row.innerHTML = `
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
@@ -814,14 +830,6 @@ export default function Home() {
   };
 
   const setupEventListeners = () => {
-      (window as any).uploadCSV = uploadCSV;
-      (window as any).exportCSV = exportCSV;
-      (window as any).uploadBacklogCSV = uploadBacklogCSV;
-      (window as any).exportBacklogCSV = exportBacklogCSV;
-      (window as any).handleManpowerSave = handleManpowerSave;
-      (window as any).handleBacklogEditChangeWrapper = handleBacklogEditChange;
-      (window as any).handleDeleteBacklogRowWrapper = handleDeleteBacklogRow;
-
       document.getElementById('theme-toggle')?.addEventListener('click', () => {
           document.documentElement.classList.toggle('dark');
           localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
@@ -839,6 +847,7 @@ export default function Home() {
       const backlogViewSelector = document.getElementById('backlog-view-selector');
       if (backlogViewSelector) {
         backlogViewSelector.addEventListener('change', (e) => {
+          setIsEditingBacklog(false); // Ensure edit mode is off when switching views
           setBacklogView((e.target as HTMLSelectElement).value);
         });
       }
@@ -1065,13 +1074,26 @@ export default function Home() {
                 </div>
                 <div id="backlog-content" className="pt-6 hidden">
                     <div className="flex justify-between items-center mb-4">
-                        <select id="backlog-view-selector" value={backlogView} onChange={(e) => setBacklogView(e.target.value)} className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="all-store">MP All-Store</option>
-                            <option value="detail-store">MP Detail Store</option>
-                        </select>
-                        <div className="flex items-center gap-2">
-                           {backlogView === 'all-store' && (
-                            <>
+                        <div className="flex items-center gap-4">
+                            <select id="backlog-view-selector" value={backlogView} onChange={(e) => {
+                                setIsEditingBacklog(false);
+                                setBacklogView(e.target.value);
+                            }} className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all-store">MP All-Store</option>
+                                <option value="detail-store">MP Detail Store</option>
+                            </select>
+                            {backlogView === 'detail-store' && !isEditingBacklog && (
+                                <Button onClick={() => {
+                                  setBacklogView('all-store');
+                                  handleToggleEditBacklog();
+                                }} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
+                                    <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
+                                </Button>
+                           )}
+                        </div>
+
+                        {backlogView === 'all-store' && (
+                            <div className="flex items-center gap-2">
                               {isEditingBacklog ? (
                                   <>
                                       <Button onClick={handleAddBacklogRow} variant="outline" size="sm" className="flex items-center gap-1.5">
@@ -1089,22 +1111,16 @@ export default function Home() {
                                       <Button onClick={handleToggleEditBacklog} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
                                           <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
                                       </Button>
-                                      <Button onClick={() => (window as any).uploadBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                                      <Button onClick={uploadBacklogCSV} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
                                           <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
                                       </Button>
-                                      <Button onClick={() => (window as any).exportBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                                      <Button onClick={exportBacklogCSV} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
                                           <Download size={16} /> <span className="hidden sm:inline">Export</span>
                                       </Button>
                                   </>
                               )}
-                            </>
-                           )}
-                           {backlogView === 'detail-store' && !isEditingBacklog && (
-                                <Button onClick={handleEditDetailStore} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
-                                    <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
-                                </Button>
-                           )}
-                         </div>
+                            </div>
+                        )}
                     </div>
                     <div id="backlog-table-container">
                       <div className="overflow-x-auto">
@@ -1123,7 +1139,7 @@ export default function Home() {
                           </table>
                       </div>
                       
-                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
+                      <div id="backlog-controls-container" className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
                           <div className="flex items-center gap-2">
                               <span>Records per page:</span>
                               <select id="backlog-records-per-page" defaultValue={recordsPerPage} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
@@ -1158,18 +1174,15 @@ export default function Home() {
                     </div>
 
                     <div id="backlog-chart-container" className="flex flex-col mt-6">
-                        <div className="flex justify-between items-center w-full mb-4">
-                             <div className="flex items-center gap-2">
-                                <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                                <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
-                            </div>
+                         <div className="flex justify-between items-center w-full mb-4">
+                            <h3 id="backlog-chart-title-main" className="text-lg font-semibold text-gray-800 dark:text-gray-200">Grafik Backlog <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-500 dark:text-gray-400">Store Name</span></h3>
                             <div className="flex items-center gap-4">
                                 <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="platform">Store Name</option>
                                     <option value="source">Marketplace</option>
                                     <option value="marketplacePlatform">Platform</option>
                                 </select>
-                                <div className="text-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div className="text-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                     <div id="chart-data-count-new" className="flex justify-between items-center gap-8 px-4 py-2 cursor-pointer border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                         <span>Marketplace Store</span>
                                         <span id="total-store-count" className="font-semibold">0</span>
@@ -1217,10 +1230,10 @@ export default function Home() {
                                 <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"><ChevronRight size={16}/></button>
                             </div>
                              <div className="flex items-center gap-2">
-                                <button onClick={() => (window as any).uploadCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">
+                                <button onClick={() => uploadCSV(sec.id as 'pick' | 'pack' | 'shipped')} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">
                                     <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
                                 </button>
-                                <button onClick={() => (window as any).exportCSV(sec.id)} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow">
+                                <button onClick={() => exportCSV(sec.id as 'pick' | 'pack' | 'shipped')} className="flex items-center gap-1.5 text-sm px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow">
                                     <Download size={16} /> <span className="hidden sm:inline">Export</span>
                                 </button>
                             </div>
@@ -1271,6 +1284,3 @@ export default function Home() {
     </>
   );
 }
-
-
-
