@@ -21,7 +21,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(10);
   
-  const [backlogData, setBacklogData] = useState<any[]>([]);
+  const backlogData = useRef<any[]>([]);
 
   // These need to be refs to persist across re-renders without causing them
   const pickData = useRef<number[]>(Array(24).fill(0));
@@ -29,8 +29,12 @@ export default function Home() {
   const shippedData = useRef<number[]>(Array(24).fill(0));
   const currentBacklogFilter = useRef('platform');
   const currentBacklogDataMode = useRef('count');
+  const isInitialized = useRef(false);
 
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+    
     // This effect runs only once on the client side after mounting for initialization.
     const init = () => {
         if (typeof window !== 'undefined') {
@@ -73,7 +77,7 @@ export default function Home() {
                 { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0", marketplacePlatform: "Tiktok" },
             ];
             
-            setBacklogData(initialBacklogData);
+            backlogData.current = initialBacklogData;
             
             Chart.register(ChartDataLabels);
             createInputFields();
@@ -100,10 +104,10 @@ export default function Home() {
 
   useEffect(() => {
     // This effect runs whenever the data or pagination settings change.
-    if (typeof window !== 'undefined' && Object.keys(chartInstances.current).length > 0) {
+    if (typeof window !== 'undefined' && isInitialized.current) {
         updateDashboard();
     }
-  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogData]);
+  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount]);
 
   const generateHours = () => {
       const hours = [];
@@ -209,7 +213,7 @@ export default function Home() {
       const filename = 'backlog_data.csv';
       const headers = ['Store Name', 'Payment Order', 'Marketplace Store', 'Platform'];
       let csvContent = headers.join(',') + '\n';
-      backlogData.forEach(item => {
+      backlogData.current.forEach(item => {
           csvContent += `"${item.platform}","${item.payment_order}","${item.source}","${item.marketplacePlatform}"\n`;
       });
 
@@ -254,7 +258,7 @@ export default function Home() {
                           });
                       }
                   });
-                  setBacklogData(newBacklogData);
+                  backlogData.current = newBacklogData;
                   setCurrentPage(1); // Reset to first page
                   document.getElementById('backlog-content')?.classList.remove('hidden');
                   showToast('Upload CSV Backlog berhasil!', 'success');
@@ -282,7 +286,7 @@ export default function Home() {
       const totalPickOrder = pickData.current.reduce((a, b) => a + b, 0);
       const totalPackOrder = packData.current.reduce((a, b) => a + b, 0);
       const totalShippedOrder = shippedData.current.reduce((a, b) => a + b, 0);
-      const paymentOrders = backlogData.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
+      const paymentOrders = backlogData.current.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
       
       const currentPickerCount = pickerCount;
       const currentPackerCount = packerCount;
@@ -448,7 +452,7 @@ export default function Home() {
       renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
       const dataToFilter = currentBacklogFilter.current;
-      const groupedData = backlogData.reduce((acc, item) => {
+      const groupedData = backlogData.current.reduce((acc, item) => {
           const key = item[dataToFilter];
           let normalizedKey = key;
           if (dataToFilter === 'platform') {
@@ -566,7 +570,7 @@ export default function Home() {
   
       const indexOfLastRecord = currentPage * recordsPerPage;
       const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-      const currentRecords = backlogData.slice(indexOfFirstRecord, indexOfLastRecord);
+      const currentRecords = backlogData.current.slice(indexOfFirstRecord, indexOfLastRecord);
   
       currentRecords.forEach(item => {
           const row = document.createElement('tr');
@@ -582,12 +586,12 @@ export default function Home() {
   
       const paginationInfo = document.getElementById('pagination-info');
       if (paginationInfo) {
-          const start = backlogData.length > 0 ? indexOfFirstRecord + 1 : 0;
-          const end = Math.min(indexOfLastRecord, backlogData.length);
-          paginationInfo.textContent = `${start}-${end} of ${backlogData.length}`;
+          const start = backlogData.current.length > 0 ? indexOfFirstRecord + 1 : 0;
+          const end = Math.min(indexOfLastRecord, backlogData.current.length);
+          paginationInfo.textContent = `${start}-${end} of ${backlogData.current.length}`;
       }
   
-      const totalPages = Math.ceil(backlogData.length / recordsPerPage);
+      const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
       const firstPageBtn = document.getElementById('first-page-btn') as HTMLButtonElement | null;
       if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
       const prevPageBtn = document.getElementById('prev-page-btn') as HTMLButtonElement | null;
@@ -674,11 +678,11 @@ export default function Home() {
       document.getElementById('first-page-btn')?.addEventListener('click', () => setCurrentPage(1));
       document.getElementById('prev-page-btn')?.addEventListener('click', () => setCurrentPage(p => Math.max(1, p - 1)));
       document.getElementById('next-page-btn')?.addEventListener('click', () => {
-          const totalPages = Math.ceil(backlogData.length / recordsPerPage);
+          const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
           setCurrentPage(p => Math.min(totalPages, p + 1));
       });
       document.getElementById('last-page-btn')?.addEventListener('click', () => {
-          const totalPages = Math.ceil(backlogData.length / recordsPerPage);
+          const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
           setCurrentPage(totalPages);
       });
   };
@@ -857,7 +861,7 @@ export default function Home() {
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Backlog Marketplace</h2>
                     <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                 </div>
-                <div id="backlog-content" className="grid grid-cols-1 gap-6 mt-4 hidden">
+                <div id="backlog-content" className="pt-6 hidden">
                     <div className="flex justify-end mb-4">
                         <div className="flex items-center gap-2">
                             <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
@@ -883,7 +887,7 @@ export default function Home() {
                         </table>
                     </div>
                     
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mt-4">
                         <div className="flex items-center gap-2">
                             <span>Records per page:</span>
                             <select id="backlog-records-per-page" defaultValue={recordsPerPage} onChange={(e) => { setRecordsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
@@ -912,7 +916,7 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col">
+                    <div className="flex flex-col mt-6">
                         <div className="flex justify-between items-center w-full mb-4">
                             <div className="flex-1 justify-start">
                                 <div className="flex items-center gap-2">
@@ -1025,3 +1029,5 @@ export default function Home() {
     </>
   );
 }
+
+    
