@@ -879,6 +879,9 @@ export default function Home() {
                 <div id="backlog-content" className="pt-6 hidden">
                     <div className="flex justify-end mb-4">
                         <div className="flex items-center gap-2">
+                             <button className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
+                                <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
+                            </button>
                             <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
                                 <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
                             </button>
