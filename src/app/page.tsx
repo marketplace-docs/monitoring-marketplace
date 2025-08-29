@@ -301,7 +301,7 @@ export default function Home() {
 
     };
 
-    const renderChart = (canvasId: string, chartType: 'bar' | 'line', labels: string[], data: number[], label: string, color: string) => {
+    const renderChart = (canvasId: string, chartType: 'bar' | 'line', labels: string[], data: number[], label: string, color: string | string[]) => {
         const ctx = document.getElementById(canvasId) as HTMLCanvasElement;
         if (!ctx) return;
 
@@ -394,10 +394,11 @@ export default function Home() {
         renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
         // Backlog Chart
+        const isDarkMode = document.documentElement.classList.contains('dark');
         const dataToFilter = currentBacklogFilter === 'platform' ? 'platform' : 'source';
         const groupedData = backlogData.reduce((acc, item) => {
             const key = item[dataToFilter];
-            const normalizedKey = key.toLowerCase().startsWith('shopee') ? 'Shopee' : (key.toLowerCase().startsWith('tiktok') ? 'Tiktok' : key);
+            const normalizedKey = key.toLowerCase().startsWith('shopee') ? 'Shopee' : (key.toLowerCase().startsWith('lazada') ? 'Lazada' : (key.toLowerCase().startsWith('tiktok') ? 'Tiktok' : key));
             
             if (currentBacklogDataMode === 'count') {
                 acc[normalizedKey] = (acc[normalizedKey] || 0) + 1;
@@ -409,9 +410,21 @@ export default function Home() {
         
         const backlogLabels = Object.keys(groupedData);
         const backlogValues = Object.values(groupedData) as number[];
+        
+        const backlogColors = backlogLabels.map(label => {
+            const lowerLabel = label.toLowerCase();
+            if (lowerLabel.includes('shopee')) return '#f97316'; // Orange
+            if (lowerLabel.includes('lazada')) return '#3b82f6'; // Blue
+            if (lowerLabel.includes('tiktok')) return isDarkMode ? '#1f2937' : '#374151'; // Black/Dark Gray
+            return '#34d399'; // Default Green
+        });
+
         const chartLabel = currentBacklogDataMode === 'count' ? 'Count of Stores' : 'Total Payment Orders';
-        document.getElementById('backlog-chart-title')!.innerText = `Grafik Backlog per ${currentBacklogFilter === 'platform' ? 'Store Name' : 'Marketplace'}`;
-        renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, '#34d399');
+        document.getElementById('backlog-chart-title-main')!.textContent = `Grafik Backlog`;
+        const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
+        const selectedOption = filterSelect.options[filterSelect.selectedIndex];
+        document.getElementById('backlog-chart-title-filter')!.textContent = selectedOption.text;
+        renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, backlogColors);
     };
 
     const updateDashboard = () => {
@@ -552,20 +565,10 @@ export default function Home() {
             }
         });
 
-        const setupFilterButton = (buttonId: string, filterType: 'platform' | 'source', otherButtonId: string) => {
-            document.getElementById(buttonId)?.addEventListener('click', () => {
-                currentBacklogFilter = filterType;
-                updateDashboard();
-                document.getElementById(buttonId)?.classList.replace('bg-gray-200', 'bg-indigo-600');
-                document.getElementById(buttonId)?.classList.replace('dark:bg-gray-700', 'dark:bg-indigo-500');
-                document.getElementById(buttonId)?.classList.add('text-white');
-                document.getElementById(otherButtonId)?.classList.replace('bg-indigo-600', 'bg-gray-200');
-                document.getElementById(otherButtonId)?.classList.replace('dark:bg-indigo-500', 'dark:bg-gray-700');
-                document.getElementById(otherButtonId)?.classList.remove('text-white');
-            });
-        };
-        setupFilterButton('filter-platform', 'platform', 'filter-source');
-        setupFilterButton('filter-source', 'source', 'filter-platform');
+        document.getElementById('backlog-filter')?.addEventListener('change', (e) => {
+            currentBacklogFilter = (e.target as HTMLSelectElement).value;
+            updateDashboard();
+        });
 
         const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment', otherButtonId: string) => {
             document.getElementById(buttonId)?.addEventListener('click', () => {
@@ -805,15 +808,19 @@ export default function Home() {
                     </div>
                     
                     <div className="flex flex-col items-center">
-                        <h3 id="backlog-chart-title" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                        <div className="flex flex-wrap justify-center gap-2 mt-2">
-                            <div className="flex rounded-md shadow-sm">
-                               <button id="filter-platform" className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-l-md hover:bg-indigo-700 transition-colors">Store</button>
-                               <button id="filter-source" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Marketplace</button>
-                            </div>
+                        <div className="flex items-center gap-2">
+                          <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
+                          <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-4 mt-4">
+                            <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="platform">Store Name</option>
+                                <option value="source">Marketplace</option>
+                            </select>
                              <div className="flex rounded-md shadow-sm">
-                               <button id="chart-data-count" className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
-                               <button id="chart-data-payment" className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
+                               <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
+                               <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
                             </div>
                         </div>
                         <div className="w-full h-80 mt-4">
@@ -868,6 +875,16 @@ export default function Home() {
                         <div className="mt-8 relative h-96">
                              <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
+                        <div className="mt-4 flex justify-center items-center gap-x-6 gap-y-2 flex-wrap">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                              <span style={{backgroundColor: sec.color}} className="w-3.5 h-3.5 rounded-sm inline-block"></span>
+                              <span>
+                                  {sec.id === 'pick' && 'Jumlah Order Pick'}
+                                  {sec.id === 'pack' && 'Jumlah Order Pack'}
+                                  {sec.id === 'shipped' && 'Jumlah Order Ship'}
+                              </span>
+                          </div>
+                      </div>
                     </div>
                 </div>
             ))}
