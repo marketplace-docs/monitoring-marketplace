@@ -949,6 +949,19 @@ export default function Home() {
     </Dialog>
   );
 
+  const getManpowerIcon = (id: string) => {
+    switch (id) {
+      case 'pick':
+        return <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+      case 'pack':
+        return <Package className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+      case 'shipped':
+        return <Truck className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -1214,8 +1227,8 @@ export default function Home() {
                               <span className="text-sm text-gray-500 dark:text-gray-400">Total:</span>
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100 total-${sec.id}-summary`}>0</span>
                             </div>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-sm text-gray-500 dark:text-gray-400">Manpower:</span>
+                            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                              {getManpowerIcon(sec.id)}
                               <span className={`text-lg font-bold text-gray-800 dark:text-gray-100`}>{sec.manpower}</span>
                             </div>
                         </div>

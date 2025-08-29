@@ -8,7 +8,6 @@
 - Picking Performance: Analyzes and shows the trend and time taken for order picking.
 - Packing Performance: Analyzes and shows the trend and time taken for order packing.
 - Shipping Performance: Analyzes and displays trends in the time taken to ship orders.
-- AI-Powered Workflow Tips: Offers advice on workflow optimization to reduce bottlenecks; uses reasoning as a tool.
 
 ## Style Guidelines:
 
