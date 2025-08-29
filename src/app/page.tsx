@@ -396,10 +396,15 @@ export default function Home() {
 
         // Backlog Chart
         const isDarkMode = document.documentElement.classList.contains('dark');
-        const dataToFilter = currentBacklogFilter === 'platform' ? 'platform' : 'source';
+        const dataToFilter = currentBacklogFilter;
         const groupedData = backlogData.reduce((acc, item) => {
             const key = item[dataToFilter];
-            const normalizedKey = key.toLowerCase().startsWith('shopee') ? 'Shopee' : (key.toLowerCase().startsWith('lazada') ? 'Lazada' : (key.toLowerCase().startsWith('tiktok') ? 'Tiktok' : key));
+            let normalizedKey = key;
+            if (dataToFilter === 'platform') {
+                normalizedKey = key.toLowerCase().startsWith('shopee') ? 'Shopee' : (key.toLowerCase().startsWith('lazada') ? 'Lazada' : (key.toLowerCase().startsWith('tiktok') ? 'Tiktok' : key));
+            } else if (dataToFilter === 'marketplacePlatform') {
+                 normalizedKey = item.marketplacePlatform;
+            }
             
             if (currentBacklogDataMode === 'count') {
                 acc[normalizedKey] = (acc[normalizedKey] || 0) + 1;
@@ -810,21 +815,28 @@ export default function Home() {
                         </table>
                     </div>
                     
-                    <div className="flex flex-col items-center">
-                        <div className="flex items-center gap-2">
-                          <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
-                          <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
-                        </div>
-
-                        <div className="flex flex-wrap justify-center gap-4 mt-4">
-                            <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="platform">Store Name</option>
-                                <option value="source">Marketplace</option>
-                            </select>
-                             <div className="flex rounded-md shadow-sm">
-                               <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
-                               <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
+                    <div className="flex flex-col">
+                        <div className="flex justify-between items-center w-full mb-4">
+                            <div className="flex-1 justify-start">
+                                <div className="flex items-center gap-2">
+                                    <h3 id="backlog-chart-title-main" className="text-lg font-medium text-gray-800 dark:text-gray-200">Grafik Backlog</h3>
+                                    <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
+                                </div>
                             </div>
+                            <div className="flex-1 justify-center">
+                                <div className="flex flex-wrap justify-center gap-4">
+                                    <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="platform">Store Name</option>
+                                        <option value="source">Marketplace</option>
+                                        <option value="marketplacePlatform">Platform</option>
+                                    </select>
+                                    <div className="flex rounded-md shadow-sm">
+                                    <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
+                                    <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex-1"></div>
                         </div>
                         <div className="w-full h-80 mt-4">
                             <canvas id="backlog-chart"></canvas>
@@ -918,3 +930,5 @@ export default function Home() {
     </>
   );
 }
+
+    
