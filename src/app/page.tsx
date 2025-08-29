@@ -84,7 +84,7 @@ export default function Home() {
             Chart.register(ChartDataLabels);
             createInputFields();
             setupCollapsible();
-            setupEventListeners(initialBacklogData);
+            setupEventListeners();
             
             updateDashboard();
         }
@@ -653,12 +653,12 @@ export default function Home() {
 
           if (isEditingBacklog) {
             row.innerHTML = `
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.platform}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'platform', index: ${originalIndex} } }))"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" type="number" value="${item.payment_order}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'payment_order', index: ${originalIndex} } }))"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.source}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'source', index: ${originalIndex} } }))"></td>
-              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.marketplacePlatform}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'marketplacePlatform', index: ${originalIndex} } }))"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.platform}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'platform', this.value)"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" type="number" value="${item.payment_order}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'payment_order', this.value)"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.source}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'source', this.value)"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.marketplacePlatform}" onchange="handleBacklogEditChangeWrapper(${originalIndex}, 'marketplacePlatform', this.value)"></td>
               <td class="px-3 py-2 text-center">
-                <button class="text-red-500 hover:text-red-700" onclick="this.dispatchEvent(new CustomEvent('delete', { bubbles: true, detail: { index: ${originalIndex} } }))">
+                <button class="text-red-500 hover:text-red-700" onclick="handleDeleteBacklogRowWrapper(${originalIndex})">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                 </button>
               </td>
@@ -673,22 +673,6 @@ export default function Home() {
           }
           tableBody.appendChild(row);
       });
-
-      // Attach event listeners for edit mode
-      if (isEditingBacklog) {
-        tableBody.querySelectorAll('input').forEach(input => {
-          input.addEventListener('change', (e: any) => {
-            const { index, field, value } = e.detail;
-            handleBacklogEditChange(index, field, value);
-          });
-        });
-        tableBody.querySelectorAll('button').forEach(button => {
-            button.addEventListener('delete', (e: any) => {
-                const { index } = e.detail;
-                handleDeleteBacklogRow(index);
-            });
-        });
-      }
   
       const paginationInfo = document.getElementById('pagination-info');
       if (paginationInfo) {
@@ -732,12 +716,14 @@ export default function Home() {
       });
   };
 
-  const setupEventListeners = (initialBacklogData: any[]) => {
+  const setupEventListeners = () => {
       (window as any).uploadCSV = uploadCSV;
       (window as any).exportCSV = exportCSV;
       (window as any).uploadBacklogCSV = uploadBacklogCSV;
       (window as any).exportBacklogCSV = exportBacklogCSV;
       (window as any).handleManpowerSave = handleManpowerSave;
+      (window as any).handleBacklogEditChangeWrapper = handleBacklogEditChange;
+      (window as any).handleDeleteBacklogRowWrapper = handleDeleteBacklogRow;
 
       document.getElementById('theme-toggle')?.addEventListener('click', () => {
           document.documentElement.classList.toggle('dark');
