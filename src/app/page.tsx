@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download, Pencil, GripVertical, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Sun, Moon, Boxes, PackageCheck, SendHorizonal, Coins, Hourglass, User, Package, Truck, LineChart, BarChart, Clock, Upload, Download, Pencil, GripVertical, ChevronsLeft, ChevronsRight, Trash2, PlusCircle } from 'lucide-react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
@@ -15,13 +15,15 @@ export default function Home() {
   const [pickerCount, setPickerCount] = useState(0);
   const [packerCount, setPackerCount] = useState(0);
   const [dispatcherCount, setDispatcherCount] = useState(0);
-  const [_, setForceRender] = useState(0);
+  const [forceRender, setForceRender] = useState(0);
 
   // Backlog pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(10);
   
   const backlogData = useRef<any[]>([]);
+  const [isEditingBacklog, setIsEditingBacklog] = useState(false);
+  const [backlogEdits, setBacklogEdits] = useState<any[]>([]);
 
   // These need to be refs to persist across re-renders without causing them
   const pickData = useRef<number[]>(Array(24).fill(0));
@@ -107,7 +109,7 @@ export default function Home() {
     if (typeof window !== 'undefined' && isInitialized.current) {
         updateDashboard();
     }
-  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount]);
+  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, forceRender]);
 
   const generateHours = () => {
       const hours = [];
@@ -331,8 +333,10 @@ export default function Home() {
       setText('performance-packer-percentage', `${performancePacker.toFixed(2)}%`);
       setText('performance-shipped-percentage', `${performanceShipped.toFixed(2)}%`);
       
-      setText('total-store-count', totalStores);
-      setText('total-payment-order', paymentOrders);
+      const totalStoreEl = document.getElementById('total-store-count');
+      if (totalStoreEl) totalStoreEl.textContent = totalStores.toLocaleString();
+      const totalPaymentOrderEl = document.getElementById('total-payment-order');
+      if (totalPaymentOrderEl) totalPaymentOrderEl.textContent = paymentOrders.toLocaleString();
 
 
       const updatePerfCard = (elementId: string, percentage: number) => {
@@ -583,35 +587,106 @@ export default function Home() {
       update('shipped-input', shippedData.current);
   };
   
+  const handleBacklogEditChange = (index: number, field: string, value: string) => {
+    const newEdits = [...backlogEdits];
+    newEdits[index][field] = value;
+    setBacklogEdits(newEdits);
+  };
+
+  const handleToggleEditBacklog = () => {
+    if (isEditingBacklog) {
+      // Logic to cancel edits
+      setIsEditingBacklog(false);
+      setBacklogEdits([]); // Discard changes
+    } else {
+      // Logic to start editing
+      setBacklogEdits(JSON.parse(JSON.stringify(backlogData.current)));
+      setIsEditingBacklog(true);
+    }
+  };
+  
+  const handleSaveBacklog = () => {
+    backlogData.current = backlogEdits;
+    setIsEditingBacklog(false);
+    updateDashboard();
+    showToast('Backlog updated successfully!', 'success');
+  };
+  
+  const handleAddBacklogRow = () => {
+    const newRow = { platform: '', payment_order: '0', source: '', marketplacePlatform: '' };
+    setBacklogEdits([newRow, ...backlogEdits]);
+  };
+  
+  const handleDeleteBacklogRow = (index: number) => {
+    const newEdits = [...backlogEdits];
+    newEdits.splice(index, 1);
+    setBacklogEdits(newEdits);
+  };
+
+
   const renderBacklogTable = () => {
       const tableBody = document.getElementById('backlog-table-body');
       if (!tableBody) return;
       tableBody.innerHTML = '';
+
+      const dataToRender = isEditingBacklog ? backlogEdits : backlogData.current;
   
       const indexOfLastRecord = currentPage * recordsPerPage;
       const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-      const currentRecords = backlogData.current.slice(indexOfFirstRecord, indexOfLastRecord);
+      const currentRecords = dataToRender.slice(indexOfFirstRecord, indexOfLastRecord);
   
-      currentRecords.forEach(item => {
+      currentRecords.forEach((item, index) => {
+          const originalIndex = indexOfFirstRecord + index;
           const row = document.createElement('tr');
           row.className = 'dark:border-gray-700';
-          row.innerHTML = `
+
+          if (isEditingBacklog) {
+            row.innerHTML = `
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.platform}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'platform', index: ${originalIndex} } }))"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" type="number" value="${item.payment_order}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'payment_order', index: ${originalIndex} } }))"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.source}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'source', index: ${originalIndex} } }))"></td>
+              <td class="px-3 py-2"><input class="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-md border border-gray-300 dark:border-gray-600" value="${item.marketplacePlatform}" oninput="this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { value: this.value, field: 'marketplacePlatform', index: ${originalIndex} } }))"></td>
+              <td class="px-3 py-2 text-center">
+                <button class="text-red-500 hover:text-red-700" onclick="this.dispatchEvent(new CustomEvent('delete', { bubbles: true, detail: { index: ${originalIndex} } }))">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                </button>
+              </td>
+            `;
+          } else {
+            row.innerHTML = `
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${parseInt(item.payment_order, 10).toLocaleString()}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.marketplacePlatform}</td>
-          `;
+            `;
+          }
           tableBody.appendChild(row);
       });
+
+      // Attach event listeners for edit mode
+      if (isEditingBacklog) {
+        tableBody.querySelectorAll('input').forEach(input => {
+          input.addEventListener('change', (e: any) => {
+            const { index, field, value } = e.detail;
+            handleBacklogEditChange(index, field, value);
+          });
+        });
+        tableBody.querySelectorAll('button').forEach(button => {
+            button.addEventListener('delete', (e: any) => {
+                const { index } = e.detail;
+                handleDeleteBacklogRow(index);
+            });
+        });
+      }
   
       const paginationInfo = document.getElementById('pagination-info');
       if (paginationInfo) {
-          const start = backlogData.current.length > 0 ? indexOfFirstRecord + 1 : 0;
-          const end = Math.min(indexOfLastRecord, backlogData.current.length);
-          paginationInfo.textContent = `${start}-${end} of ${backlogData.current.length}`;
+          const start = dataToRender.length > 0 ? indexOfFirstRecord + 1 : 0;
+          const end = Math.min(indexOfLastRecord, dataToRender.length);
+          paginationInfo.textContent = `${start}-${end} of ${dataToRender.length}`;
       }
   
-      const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
+      const totalPages = Math.ceil(dataToRender.length / recordsPerPage);
       const firstPageBtn = document.getElementById('first-page-btn') as HTMLButtonElement | null;
       if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
       const prevPageBtn = document.getElementById('prev-page-btn') as HTMLButtonElement | null;
@@ -690,14 +765,16 @@ export default function Home() {
         });
       }
 
-      document.getElementById('first-page-btn')?.addEventListener('click', () => setCurrentPage(1));
+      document.getElementById('first-page-btn')?.addEventListener('click', () => setCurrentPage(p => 1));
       document.getElementById('prev-page-btn')?.addEventListener('click', () => setCurrentPage(p => Math.max(1, p - 1)));
       document.getElementById('next-page-btn')?.addEventListener('click', () => {
-          const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
+          const dataToPaginate = isEditingBacklog ? backlogEdits : backlogData.current;
+          const totalPages = Math.ceil(dataToPaginate.length / recordsPerPage);
           setCurrentPage(p => Math.min(totalPages, p + 1));
       });
       document.getElementById('last-page-btn')?.addEventListener('click', () => {
-          const totalPages = Math.ceil(backlogData.current.length / recordsPerPage);
+          const dataToPaginate = isEditingBacklog ? backlogEdits : backlogData.current;
+          const totalPages = Math.ceil(dataToPaginate.length / recordsPerPage);
           setCurrentPage(totalPages);
       });
   };
@@ -879,15 +956,31 @@ export default function Home() {
                 <div id="backlog-content" className="pt-6 hidden">
                     <div className="flex justify-end mb-4">
                         <div className="flex items-center gap-2">
-                             <button className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
-                                <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
-                            </button>
-                            <button onClick={() => (window as any).uploadBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
-                                <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
-                            </button>
-                            <button onClick={() => (window as any).exportBacklogCSV()} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
-                                <Download size={16} /> <span className="hidden sm:inline">Export</span>
-                            </button>
+                            {isEditingBacklog ? (
+                                <>
+                                    <Button onClick={handleAddBacklogRow} variant="outline" size="sm" className="flex items-center gap-1.5">
+                                        <PlusCircle size={16} /> Add Row
+                                    </Button>
+                                    <Button onClick={handleSaveBacklog} size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5">
+                                        Save
+                                    </Button>
+                                    <Button onClick={handleToggleEditBacklog} variant="destructive" size="sm" className="flex items-center gap-1.5">
+                                        Cancel
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button onClick={handleToggleEditBacklog} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
+                                        <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
+                                    </Button>
+                                    <Button onClick={() => (window as any).uploadBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow-sm">
+                                        <Upload size={16} /> <span className="hidden sm:inline">Upload</span>
+                                    </Button>
+                                    <Button onClick={() => (window as any).exportBacklogCSV()} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm">
+                                        <Download size={16} /> <span className="hidden sm:inline">Export</span>
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </div>
                     <div className="overflow-x-auto">
@@ -898,6 +991,7 @@ export default function Home() {
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+                                    {isEditingBacklog && <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>}
                                 </tr>
                             </thead>
                             <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
