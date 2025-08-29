@@ -683,7 +683,7 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
+                <div className="bg-red-500 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
                     <p className="text-sm font-medium opacity-90">Total Pick Order</p>
                     <div className="flex items-end justify-between mt-2">
                         <p className="text-4xl font-bold" id="total-pick-order">0</p>
@@ -697,7 +697,7 @@ export default function Home() {
                         <PackageCheck className="w-8 h-8 opacity-50" />
                     </div>
                 </div>
-                <div className="bg-gradient-to-br from-teal-400 to-emerald-500 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
+                <div className="bg-purple-500 text-white p-5 rounded-xl shadow-lg flex flex-col justify-between">
                     <p className="text-sm font-medium opacity-90">Total Shipped Order</p>
                     <div className="flex items-end justify-between mt-2">
                         <p className="text-4xl font-bold" id="total-shipped-orders">0</p>
@@ -708,7 +708,7 @@ export default function Home() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Payment Accepted</p>
                     <div className="flex items-end justify-between mt-2">
                         <p className="text-4xl font-bold text-gray-800 dark:text-gray-100" id="payment-accepted-count">0</p>
-                        <Coins className="w-8 h-8 text-amber-500 opacity-70" />
+                        <Coins className="w-8 h-8 text-green-500 opacity-70" />
                     </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
