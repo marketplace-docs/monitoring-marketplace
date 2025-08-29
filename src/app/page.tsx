@@ -15,7 +15,6 @@ export default function Home() {
   const [pickerCount, setPickerCount] = useState(0);
   const [packerCount, setPackerCount] = useState(0);
   const [dispatcherCount, setDispatcherCount] = useState(0);
-  const [forceRender, setForceRender] = useState(0);
 
   // Backlog pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +31,10 @@ export default function Home() {
   const currentBacklogFilter = useRef('platform');
   const currentBacklogDataMode = useRef('count');
   const isInitialized = useRef(false);
+
+  const [isPickerDialogOpen, setPickerDialogOpen] = useState(false);
+  const [isPackerDialogOpen, setPackerDialogOpen] = useState(false);
+  const [isDispatcherDialogOpen, setDispatcherDialogOpen] = useState(false);
 
   useEffect(() => {
     // This effect runs only once on the client side after mounting for initialization.
@@ -109,7 +112,7 @@ export default function Home() {
     if (typeof window !== 'undefined' && isInitialized.current) {
         updateDashboard();
     }
-  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, forceRender]);
+  }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogEdits, isEditingBacklog]);
 
   const generateHours = () => {
       const hours = [];
@@ -277,10 +280,18 @@ export default function Home() {
       const input = document.getElementById(`${type}-input`) as HTMLInputElement;
       if (input) {
           const value = parseInt(input.value, 10) || 0;
-          if (type === 'picker') setPickerCount(value);
-          if (type === 'packer') setPackerCount(value);
-          if (type === 'dispatcher') setDispatcherCount(value);
-          document.getElementById(`${type}-dialog-close`)?.click();
+          if (type === 'picker') {
+              setPickerCount(value);
+              setPickerDialogOpen(false);
+          }
+          if (type === 'packer') {
+              setPackerCount(value);
+              setPackerDialogOpen(false);
+          }
+          if (type === 'dispatcher') {
+              setDispatcherCount(value);
+              setDispatcherDialogOpen(false);
+          }
       }
   };
 
@@ -440,6 +451,7 @@ export default function Home() {
   };
   
   const renderAllCharts = () => {
+      if (typeof window === 'undefined') return;
       const startPickHourEl = document.getElementById('pick-start-hour') as HTMLInputElement;
       if (!startPickHourEl) return; 
 
@@ -523,7 +535,6 @@ export default function Home() {
       updateSummary();
       renderBacklogTable();
       renderAllCharts();
-      setForceRender(c => c + 1);
   };
 
   const createInputFields = () => {
@@ -784,13 +795,17 @@ export default function Home() {
     title,
     icon,
     count,
+    open,
+    onOpenChange,
   }: {
     type: 'picker' | 'packer' | 'dispatcher';
     title: string;
     icon: React.ReactNode;
     count: number;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
   }) => (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">
         <div className="flex justify-between items-start">
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{title}</p>
@@ -821,9 +836,7 @@ export default function Home() {
           </div>
         </div>
         <DialogFooter>
-            <DialogClose asChild>
-                <Button id={`${type}-dialog-close`} type="button" variant="secondary">Cancel</Button>
-            </DialogClose>
+            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="button" onClick={() => handleManpowerSave(type)}>Save changes</Button>
         </DialogFooter>
       </DialogContent>
@@ -898,9 +911,9 @@ export default function Home() {
                     <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300" />
                 </div>
                 <div id="performance-content" className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 hidden">
-                    <ManpowerCard type="picker" title="Jumlah Picker" icon={<User className="w-4 h-4 text-blue-500" />} count={pickerCount} />
-                    <ManpowerCard type="packer" title="Jumlah Packer" icon={<Package className="w-4 h-4 text-green-500" />} count={packerCount} />
-                    <ManpowerCard type="dispatcher" title="Jumlah Dispatcher" icon={<Truck className="w-4 h-4 text-blue-500" />} count={dispatcherCount} />
+                    <ManpowerCard type="picker" title="Jumlah Picker" icon={<User className="w-4 h-4 text-blue-500" />} count={pickerCount} open={isPickerDialogOpen} onOpenChange={setPickerDialogOpen} />
+                    <ManpowerCard type="packer" title="Jumlah Packer" icon={<Package className="w-4 h-4 text-green-500" />} count={packerCount} open={isPackerDialogOpen} onOpenChange={setPackerDialogOpen} />
+                    <ManpowerCard type="dispatcher" title="Jumlah Dispatcher" icon={<Truck className="w-4 h-4 text-blue-500" />} count={dispatcherCount} open={isDispatcherDialogOpen} onOpenChange={setDispatcherDialogOpen} />
                     
                     <div id="card-performance-picker" className="p-4 rounded-lg flex justify-between items-center bg-slate-500 dark:bg-slate-700 text-white">
                         <div>
@@ -991,7 +1004,7 @@ export default function Home() {
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
-                                    {isEditingBacklog && <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>}
+                                    {isEditingBacklog && <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>}
                                 </tr>
                             </thead>
                             <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -1142,3 +1155,5 @@ export default function Home() {
     </>
   );
 }
+
+    
