@@ -942,11 +942,15 @@ export default function Home() {
                                 </div>
                             </div>
                             <div className="flex flex-1 justify-end items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-                               <div className="text-right">
-                                   <div>Jumlah Store: <span id="total-store-count" className="font-semibold">0</span></div>
-                               </div>
-                               <div className="text-right">
-                                    <div>Jml Payment Order: <span id="total-payment-order" className="font-semibold">0</span></div>
+                               <div className="w-48 text-gray-800 dark:text-gray-200">
+                                   <div className="flex justify-between">
+                                       <span>Marketplace Store</span>
+                                       <span id="total-store-count" className="font-semibold">0</span>
+                                   </div>
+                                   <div className="flex justify-between">
+                                        <span>Payment Accepted</span>
+                                        <span id="total-payment-order" className="font-semibold">0</span>
+                                   </div>
                                </div>
                             </div>
                         </div>
