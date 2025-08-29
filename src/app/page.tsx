@@ -32,9 +32,6 @@ export default function Home() {
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (isInitialized.current) return;
-    isInitialized.current = true;
-    
     // This effect runs only once on the client side after mounting for initialization.
     const init = () => {
         if (typeof window !== 'undefined') {
@@ -88,7 +85,10 @@ export default function Home() {
         }
     };
 
-    init();
+    if (!isInitialized.current) {
+        init();
+        isInitialized.current = true;
+    }
 
     return () => {
       if (typeof window !== 'undefined') {
@@ -260,7 +260,7 @@ export default function Home() {
                   });
                   backlogData.current = newBacklogData;
                   setCurrentPage(1); // Reset to first page
-                  document.getElementById('backlog-content')?.classList.remove('hidden');
+                  updateDashboard();
                   showToast('Upload CSV Backlog berhasil!', 'success');
               } catch (error) {
                   showToast('Gagal memproses file CSV.', 'error');
@@ -287,6 +287,8 @@ export default function Home() {
       const totalPackOrder = packData.current.reduce((a, b) => a + b, 0);
       const totalShippedOrder = shippedData.current.reduce((a, b) => a + b, 0);
       const paymentOrders = backlogData.current.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
+      
+      const totalStores = backlogData.current.length;
       
       const currentPickerCount = pickerCount;
       const currentPackerCount = packerCount;
@@ -328,6 +330,10 @@ export default function Home() {
       setText('performance-picker-percentage', `${performancePicker.toFixed(2)}%`);
       setText('performance-packer-percentage', `${performancePacker.toFixed(2)}%`);
       setText('performance-shipped-percentage', `${performanceShipped.toFixed(2)}%`);
+      
+      setText('total-store-count', totalStores);
+      setText('total-payment-order', paymentOrders);
+
 
       const updatePerfCard = (elementId: string, percentage: number) => {
           const el = document.getElementById(elementId);
@@ -924,20 +930,25 @@ export default function Home() {
                                     <span id="backlog-chart-title-filter" className="text-lg font-medium text-gray-800 dark:text-gray-200">Store Name</span>
                                 </div>
                             </div>
-                            <div className="flex-1 justify-center">
-                                <div className="flex flex-wrap justify-center gap-4">
-                                    <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="platform">Store Name</option>
-                                        <option value="source">Marketplace</option>
-                                        <option value="marketplacePlatform">Platform</option>
-                                    </select>
-                                    <div className="flex rounded-md shadow-sm">
-                                    <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
-                                    <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
-                                    </div>
+                            <div className="flex flex-1 justify-center items-center gap-4 flex-wrap">
+                                <select id="backlog-filter" className="px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-md shadow-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="platform">Store Name</option>
+                                    <option value="source">Marketplace</option>
+                                    <option value="marketplacePlatform">Platform</option>
+                                </select>
+                                <div className="flex rounded-md shadow-sm">
+                                <button id="chart-data-count" className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-l-md hover:bg-indigo-700 transition-colors">Count</button>
+                                <button id="chart-data-payment" className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-sm rounded-r-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Payment</button>
                                 </div>
                             </div>
-                            <div className="flex-1"></div>
+                            <div className="flex flex-1 justify-end items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                               <div className="text-right">
+                                   <div>Jumlah Store: <span id="total-store-count" className="font-semibold">0</span></div>
+                               </div>
+                               <div className="text-right">
+                                    <div>Jml Payment Order: <span id="total-payment-order" className="font-semibold">0</span></div>
+                               </div>
+                            </div>
                         </div>
                         <div className="w-full h-80 mt-4">
                             <canvas id="backlog-chart"></canvas>
@@ -963,7 +974,7 @@ export default function Home() {
                         <ChevronDown className="lucide-chevron-down text-gray-500 dark:text-gray-400 transition-transform duration-300 ml-2" />
                     </div>
                     <div id={`${sec.id}-content`} className="pt-6 hidden">
-                        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap justify-between mb-6">
+                       <div className="flex items-center gap-x-4 gap-y-2 flex-wrap justify-between mb-6">
                            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                                 <label htmlFor={`${sec.id}-start-hour`} className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">From:</label>
                                 <input type="number" id={`${sec.id}-start-hour`} defaultValue="0" min="0" max="23" className="w-16 p-1 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md text-center" />
@@ -1030,4 +1041,3 @@ export default function Home() {
   );
 }
 
-    
