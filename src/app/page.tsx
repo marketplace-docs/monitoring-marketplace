@@ -23,14 +23,15 @@ export default function Home() {
   
   const [backlogData, setBacklogData] = useState<any[]>([]);
 
-  let pickData: number[] = Array(24).fill(0);
-  let packData: number[] = Array(24).fill(0);
-  let shippedData: number[] = Array(24).fill(0);
-  let currentBacklogFilter = 'platform';
-  let currentBacklogDataMode = 'count';
+  // These need to be refs to persist across re-renders without causing them
+  const pickData = useRef<number[]>(Array(24).fill(0));
+  const packData = useRef<number[]>(Array(24).fill(0));
+  const shippedData = useRef<number[]>(Array(24).fill(0));
+  const currentBacklogFilter = useRef('platform');
+  const currentBacklogDataMode = useRef('count');
 
   useEffect(() => {
-    // This effect runs only once on the client side after mounting.
+    // This effect runs only once on the client side after mounting for initialization.
     const init = () => {
         if (typeof window !== 'undefined') {
             if (localStorage.getItem('theme') === 'dark' || 
@@ -74,13 +75,11 @@ export default function Home() {
             
             setBacklogData(initialBacklogData);
             
-            // All DOM interactions and event listener setups must be here.
             Chart.register(ChartDataLabels);
             createInputFields();
             setupCollapsible();
             setupEventListeners(initialBacklogData);
             
-            // Initial render
             updateDashboard();
         }
     };
@@ -89,7 +88,6 @@ export default function Home() {
 
     return () => {
       if (typeof window !== 'undefined') {
-        // Cleanup charts
         Object.values(chartInstances.current).forEach(chart => {
             if (chart) {
                 chart.destroy();
@@ -102,8 +100,7 @@ export default function Home() {
 
   useEffect(() => {
     // This effect runs whenever the data or pagination settings change.
-    // It's responsible for re-rendering the dashboard components.
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && Object.keys(chartInstances.current).length > 0) {
         updateDashboard();
     }
   }, [currentPage, recordsPerPage, pickerCount, packerCount, dispatcherCount, backlogData]);
@@ -133,15 +130,15 @@ export default function Home() {
   const exportCSV = (type: 'pick' | 'pack' | 'shipped') => {
       let data: number[], filename: string, headers: string[];
       if (type === 'pick') {
-          data = pickData;
+          data = pickData.current;
           filename = 'pick_data.csv';
           headers = ['Jam', 'Jumlah Order Picked'];
       } else if (type === 'pack') {
-          data = packData;
+          data = packData.current;
           filename = 'pack_data.csv';
           headers = ['Jam', 'Jumlah Order Packed'];
       } else {
-          data = shippedData;
+          data = shippedData.current;
           filename = 'shipped_data.csv';
           headers = ['Jam', 'Jumlah Order Shipped'];
       }
@@ -193,9 +190,9 @@ export default function Home() {
                       }
                   });
 
-                  if (type === 'pick') pickData = [...newData];
-                  else if (type === 'pack') packData = [...newData];
-                  else if (type === 'shipped') shippedData = [...newData];
+                  if (type === 'pick') pickData.current = [...newData];
+                  else if (type === 'pack') packData.current = [...newData];
+                  else if (type === 'shipped') shippedData.current = [...newData];
                   
                   updateDashboard();
                   showToast('Upload CSV berhasil!', 'success');
@@ -282,18 +279,18 @@ export default function Home() {
   };
 
   const updateSummary = () => {
-      const totalPickOrder = pickData.reduce((a, b) => a + b, 0);
-      const totalPackOrder = packData.reduce((a, b) => a + b, 0);
-      const totalShippedOrder = shippedData.reduce((a, b) => a + b, 0);
+      const totalPickOrder = pickData.current.reduce((a, b) => a + b, 0);
+      const totalPackOrder = packData.current.reduce((a, b) => a + b, 0);
+      const totalShippedOrder = shippedData.current.reduce((a, b) => a + b, 0);
       const paymentOrders = backlogData.reduce((sum, item) => sum + (parseInt(item.payment_order, 10) || 0), 0);
       
       const currentPickerCount = pickerCount;
       const currentPackerCount = packerCount;
       const currentDispatcherCount = dispatcherCount;
 
-      const nonZeroPick = pickData.filter(v => v > 0).length || 1;
-      const nonZeroPack = packData.filter(v => v > 0).length || 1;
-      const nonZeroShipped = shippedData.filter(v => v > 0).length || 1;
+      const nonZeroPick = pickData.current.filter(v => v > 0).length || 1;
+      const nonZeroPack = packData.current.filter(v => v > 0).length || 1;
+      const nonZeroShipped = shippedData.current.filter(v => v > 0).length || 1;
       
       const inProgressOrders = totalPickOrder - totalPackOrder;
       
@@ -430,29 +427,27 @@ export default function Home() {
   
   const renderAllCharts = () => {
       const startPickHourEl = document.getElementById('pick-start-hour') as HTMLInputElement;
-      if (!startPickHourEl) return; // Guard clause
+      if (!startPickHourEl) return; 
 
       const startPickHour = parseInt(startPickHourEl.value, 10);
       const endPickHour = parseInt((document.getElementById('pick-end-hour') as HTMLInputElement).value, 10);
       const filteredPickHours = hours.slice(startPickHour, endPickHour + 1);
-      const filteredPickData = pickData.slice(startPickHour, endPickHour + 1);
+      const filteredPickData = pickData.current.slice(startPickHour, endPickHour + 1);
       renderChart('pick-chart', 'bar', filteredPickHours, filteredPickData, 'Total Picked', '#ef4444');
 
       const startPackHour = parseInt((document.getElementById('pack-start-hour') as HTMLInputElement).value, 10);
       const endPackHour = parseInt((document.getElementById('pack-end-hour') as HTMLInputElement).value, 10);
       const filteredPackHours = hours.slice(startPackHour, endPackHour + 1);
-      const filteredPackData = packData.slice(startPackHour, endPackHour + 1);
+      const filteredPackData = packData.current.slice(startPackHour, endPackHour + 1);
       renderChart('pack-chart', 'bar', filteredPackHours, filteredPackData, 'Total Packed', '#f59e0b');
       
       const startShippedHour = parseInt((document.getElementById('shipped-start-hour') as HTMLInputElement).value, 10);
       const endShippedHour = parseInt((document.getElementById('shipped-end-hour') as HTMLInputElement).value, 10);
       const filteredShippedHours = hours.slice(startShippedHour, endShippedHour + 1);
-      const filteredShippedData = shippedData.slice(startShippedHour, endShippedHour + 1);
+      const filteredShippedData = shippedData.current.slice(startShippedHour, endShippedHour + 1);
       renderChart('shipped-chart', 'bar', filteredShippedHours, filteredShippedData, 'Total Shipped', '#8b5cf6');
 
-      // Backlog Chart
-      const isDarkMode = document.documentElement.classList.contains('dark');
-      const dataToFilter = currentBacklogFilter;
+      const dataToFilter = currentBacklogFilter.current;
       const groupedData = backlogData.reduce((acc, item) => {
           const key = item[dataToFilter];
           let normalizedKey = key;
@@ -462,7 +457,7 @@ export default function Home() {
                normalizedKey = item.marketplacePlatform;
           }
           
-          if (currentBacklogDataMode === 'count') {
+          if (currentBacklogDataMode.current === 'count') {
               acc[normalizedKey] = (acc[normalizedKey] || 0) + 1;
           } else {
               acc[normalizedKey] = (acc[normalizedKey] || 0) + (parseInt(item.payment_order, 10) || 0);
@@ -473,19 +468,25 @@ export default function Home() {
       const backlogLabels = Object.keys(groupedData);
       const backlogValues = Object.values(groupedData) as number[];
       
+      const isDarkMode = document.documentElement.classList.contains('dark');
       const backlogColors = backlogLabels.map(label => {
           const lowerLabel = label.toLowerCase();
-          if (lowerLabel.includes('shopee')) return '#f97316'; // Orange
-          if (lowerLabel.includes('lazada')) return '#3b82f6'; // Blue
-          if (lowerLabel.includes('tiktok')) return isDarkMode ? '#1f2937' : '#374151'; // Black/Dark Gray
-          return '#34d399'; // Default Green
+          if (lowerLabel.includes('shopee')) return '#f97316';
+          if (lowerLabel.includes('lazada')) return '#3b82f6';
+          if (lowerLabel.includes('tiktok')) return isDarkMode ? '#1f2937' : '#374151';
+          return '#34d399';
       });
 
-      const chartLabel = currentBacklogDataMode === 'count' ? 'Count of Stores' : 'Total Payment Orders';
-      document.getElementById('backlog-chart-title-main')!.textContent = `Grafik Backlog`;
+      const chartLabel = currentBacklogDataMode.current === 'count' ? 'Count of Stores' : 'Total Payment Orders';
+      const mainTitleEl = document.getElementById('backlog-chart-title-main');
+      if (mainTitleEl) mainTitleEl.textContent = `Grafik Backlog`;
+      
       const filterSelect = document.getElementById('backlog-filter') as HTMLSelectElement;
-      const selectedOption = filterSelect.options[filterSelect.selectedIndex];
-      document.getElementById('backlog-chart-title-filter')!.textContent = selectedOption.text;
+      if (filterSelect) {
+        const selectedOption = filterSelect.options[filterSelect.selectedIndex];
+        const filterTitleEl = document.getElementById('backlog-chart-title-filter');
+        if (filterTitleEl) filterTitleEl.textContent = selectedOption.text;
+      }
       renderChart('backlog-chart', 'bar', backlogLabels, backlogValues, chartLabel, backlogColors);
   };
 
@@ -535,9 +536,9 @@ export default function Home() {
               input.addEventListener('input', (e) => {
                   const index = parseInt((e.target as HTMLInputElement).dataset.index!, 10);
                   const value = parseInt((e.target as HTMLInputElement).value, 10) || 0;
-                  if (dataType === 'pick') pickData[index] = value;
-                  else if (dataType === 'pack') packData[index] = value;
-                  else if (dataType === 'shipped') shippedData[index] = value;
+                  if (dataType === 'pick') pickData.current[index] = value;
+                  else if (dataType === 'pack') packData.current[index] = value;
+                  else if (dataType === 'shipped') shippedData.current[index] = value;
                   updateDashboard();
               });
           });
@@ -553,9 +554,9 @@ export default function Home() {
               (input as HTMLInputElement).value = (data[index] || 0).toString();
           });
       };
-      update('pick-input', pickData);
-      update('pack-input', packData);
-      update('shipped-input', shippedData);
+      update('pick-input', pickData.current);
+      update('pack-input', packData.current);
+      update('shipped-input', shippedData.current);
   };
   
   const renderBacklogTable = () => {
@@ -579,7 +580,6 @@ export default function Home() {
           tableBody.appendChild(row);
       });
   
-      // Update pagination info
       const paginationInfo = document.getElementById('pagination-info');
       if (paginationInfo) {
           const start = backlogData.length > 0 ? indexOfFirstRecord + 1 : 0;
@@ -587,7 +587,6 @@ export default function Home() {
           paginationInfo.textContent = `${start}-${end} of ${backlogData.length}`;
       }
   
-      // Update pagination buttons state
       const totalPages = Math.ceil(backlogData.length / recordsPerPage);
       const firstPageBtn = document.getElementById('first-page-btn') as HTMLButtonElement | null;
       if (firstPageBtn) firstPageBtn.disabled = currentPage === 1;
@@ -624,7 +623,6 @@ export default function Home() {
   };
 
   const setupEventListeners = (initialBacklogData: any[]) => {
-      // Assign client-side functions to window object
       (window as any).uploadCSV = uploadCSV;
       (window as any).exportCSV = exportCSV;
       (window as any).uploadBacklogCSV = uploadBacklogCSV;
@@ -646,13 +644,13 @@ export default function Home() {
       });
 
       document.getElementById('backlog-filter')?.addEventListener('change', (e) => {
-          currentBacklogFilter = (e.target as HTMLSelectElement).value;
+          currentBacklogFilter.current = (e.target as HTMLSelectElement).value;
           updateDashboard();
       });
 
       const setupDataModeButton = (buttonId: string, dataMode: 'count' | 'payment', otherButtonId: string) => {
           document.getElementById(buttonId)?.addEventListener('click', () => {
-              currentBacklogDataMode = dataMode;
+              currentBacklogDataMode.current = dataMode;
               updateDashboard();
               document.getElementById(buttonId)?.classList.replace('bg-gray-200', 'bg-indigo-600');
               document.getElementById(buttonId)?.classList.replace('dark:bg-gray-700', 'dark:bg-indigo-500');
@@ -665,7 +663,6 @@ export default function Home() {
       setupDataModeButton('chart-data-count', 'count', 'chart-data-payment');
       setupDataModeButton('chart-data-payment', 'payment', 'chart-data-count');
       
-      // Pagination listeners
       const recordsPerPageSelect = document.getElementById('backlog-records-per-page');
       if (recordsPerPageSelect) {
         recordsPerPageSelect.addEventListener('change', (e) => {
@@ -889,10 +886,11 @@ export default function Home() {
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center gap-2">
                             <span>Records per page:</span>
-                            <select id="backlog-records-per-page" value={recordsPerPage} onChange={(e) => { setRecordsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
+                            <select id="backlog-records-per-page" defaultValue={recordsPerPage} onChange={(e) => { setRecordsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1">
                                 <option value="5">5</option>
                                 <option value="10">10</option>
                                 <option value="30">30</option>
+                                <option value="100">100</option>
                             </select>
                         </div>
                         <div className="flex items-center gap-4">
