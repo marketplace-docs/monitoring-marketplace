@@ -627,6 +627,11 @@ export default function Home() {
       setIsEditingBacklog(true);
     }
   };
+
+  const handleEditDetailStore = () => {
+    setBacklogView('all-store');
+    handleToggleEditBacklog();
+  }
   
   const handleSaveBacklog = () => {
     backlogData.current = backlogEdits;
@@ -1094,6 +1099,11 @@ export default function Home() {
                               )}
                             </>
                            )}
+                           {backlogView === 'detail-store' && !isEditingBacklog && (
+                                <Button onClick={handleEditDetailStore} size="sm" className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors shadow-sm">
+                                    <Pencil size={16} /> <span className="hidden sm:inline">Edit</span>
+                                </Button>
+                           )}
                          </div>
                     </div>
                     <div id="backlog-table-container">
@@ -1261,5 +1271,6 @@ export default function Home() {
     </>
   );
 }
+
 
 
