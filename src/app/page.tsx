@@ -652,7 +652,17 @@ export default function Home() {
       detailContainer.innerHTML = '';
   
       const table = document.createElement('table');
-      table.className = "min-w-full divide-y divide-gray-200 dark:divide-gray-700";
+      table.className = "min-w-full divide-y divide-gray-200 dark:divide-gray-700 mt-4";
+      
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr class="border-b border-gray-200 dark:border-gray-700">
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Accepted</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
       const tbody = document.createElement('tbody');
       tbody.className = "bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700";
       table.appendChild(tbody);
@@ -1253,3 +1263,4 @@ export default function Home() {
     </>
   );
 }
+
