@@ -38,37 +38,37 @@ export default function Home() {
     const hours = generateHours();
 
     const initialBacklogData = [
-        { source: "Jung Saem Mool Official Store", platform: "Shopee Jung Saem Mool", payment_order: "0" },
-        { source: "Amuse Official Store", platform: "Shopee Amuse", payment_order: "0" },
-        { source: "Carasun.id Official Store", platform: "Shopee Carasun", payment_order: "0" },
-        { source: "Ariul Official Store", platform: "Shopee Ariul", payment_order: "0" },
-        { source: "Dr G Official Store", platform: "Shopee Dr G", payment_order: "0" },
-        { source: "Im From Official Store", platform: "Shopee Im From", payment_order: "0" },
-        { source: "COSRX Official Store", platform: "Shopee COSRX", payment_order: "0" },
-        { source: "Espoir Official Store", platform: "Shopee Espoir", payment_order: "0" },
-        { source: "Mediheal Official Store", platform: "Shopee Mediheal", payment_order: "0" },
-        { source: "Keana Official Store", platform: "Shopee Keana", payment_order: "0" },
-        { source: "Lilla Baby Indonesia", platform: "Shopee Lilla Baby", payment_order: "0" },
-        { source: "Lilla Official store", platform: "Shopee lilla", payment_order: "0" },
-        { source: "Edit by Sociolla", platform: "Shopee", payment_order: "0" },
-        { source: "Round Lab Official Store", platform: "Shopee Round Lab", payment_order: "0" },
-        { source: "Speak To Me Official Store", platform: "Shopee Speak to me", payment_order: "0" },
-        { source: "Sukin Official Store", platform: "Shopee Sukin", payment_order: "0" },
-        { source: "Woshday Official Store", platform: "Shopee Woshday", payment_order: "0" },
-        { source: "Gemistry Official Store", platform: "Shopee Gemistry", payment_order: "0" },
-        { source: "Sungboon Editor Official Store", platform: "Shopee Sungboon Editor", payment_order: "0" },
-        { source: "Derma Angel Official Store", platform: "Shopee Derma Angel", payment_order: "0" },
-        { source: "UIQ Official Store", platform: "Shopee UIQ", payment_order: "0" },
-        { source: "UB Mom Indonesia", platform: "Shopee UB Mom", payment_order: "0" },
-        { source: "Bioheal Official Store", platform: "Shopee Bioheal", payment_order: "0" },
-        { source: "COSRX Official Store", platform: "Lazada Cosrx", payment_order: "0" },
-        { source: "Lilla Official store", platform: "tiktok_lilla", payment_order: "0" },
-        { source: "COSRX Official Store", platform: "tiktok_cosrx", payment_order: "0" },
-        { source: "Carasun.id Official Store", platform: "tiktok_carasun", payment_order: "0" },
-        { source: "Derma Angel Official Store", platform: "tiktok_derma_angel", payment_order: "0" },
-        { source: "Lilla Baby Indonesia", platform: "tiktok_lilla_Baby", payment_order: "0" },
-        { source: "Edit by Sociolla", platform: "tiktok", payment_order: "0" },
-        { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0" },
+        { source: "Jung Saem Mool Official Store", platform: "Shopee Jung Saem Mool", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Amuse Official Store", platform: "Shopee Amuse", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Carasun.id Official Store", platform: "Shopee Carasun", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Ariul Official Store", platform: "Shopee Ariul", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Dr G Official Store", platform: "Shopee Dr G", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Im From Official Store", platform: "Shopee Im From", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "COSRX Official Store", platform: "Shopee COSRX", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Espoir Official Store", platform: "Shopee Espoir", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Mediheal Official Store", platform: "Shopee Mediheal", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Keana Official Store", platform: "Shopee Keana", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Lilla Baby Indonesia", platform: "Shopee Lilla Baby", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Lilla Official store", platform: "Shopee lilla", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Edit by Sociolla", platform: "Shopee", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Round Lab Official Store", platform: "Shopee Round Lab", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Speak To Me Official Store", platform: "Shopee Speak to me", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Sukin Official Store", platform: "Shopee Sukin", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Woshday Official Store", platform: "Shopee Woshday", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Gemistry Official Store", platform: "Shopee Gemistry", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Sungboon Editor Official Store", platform: "Shopee Sungboon Editor", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Derma Angel Official Store", platform: "Shopee Derma Angel", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "UIQ Official Store", platform: "Shopee UIQ", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "UB Mom Indonesia", platform: "Shopee UB Mom", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "Bioheal Official Store", platform: "Shopee Bioheal", payment_order: "0", marketplacePlatform: "Shopee" },
+        { source: "COSRX Official Store", platform: "Lazada Cosrx", payment_order: "0", marketplacePlatform: "Lazada" },
+        { source: "Lilla Official store", platform: "tiktok_lilla", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "COSRX Official Store", platform: "tiktok_cosrx", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "Carasun.id Official Store", platform: "tiktok_carasun", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "Derma Angel Official Store", platform: "tiktok_derma_angel", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "Lilla Baby Indonesia", platform: "tiktok_lilla_Baby", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "Edit by Sociolla", platform: "tiktok", payment_order: "0", marketplacePlatform: "Tiktok" },
+        { source: "Round Lab Official Store", platform: "tiktok_roundlab", payment_order: "0", marketplacePlatform: "Tiktok" },
     ];
 
     const showToast = (message: string, type: 'success' | 'error') => {
@@ -163,10 +163,10 @@ export default function Home() {
 
     const exportBacklogCSV = () => {
         const filename = 'backlog_data.csv';
-        const headers = ['Store Name', 'Payment Order', 'Marketplace Store'];
+        const headers = ['Store Name', 'Payment Order', 'Marketplace Store', 'Platform'];
         let csvContent = headers.join(',') + '\n';
         backlogData.forEach(item => {
-            csvContent += `"${item.platform}","${item.payment_order}","${item.source}"\n`;
+            csvContent += `"${item.platform}","${item.payment_order}","${item.source}","${item.marketplacePlatform}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -201,11 +201,12 @@ export default function Home() {
                     
                     lines.slice(1).forEach(line => {
                         const parts = line.split(',');
-                        if (parts.length >= 3) {
+                        if (parts.length >= 4) {
                             newBacklogData.push({
                                 platform: parts[0].trim().replace(/"/g, ''),
                                 payment_order: (parts[1].trim() && !isNaN(parseInt(parts[1].trim(), 10))) ? parts[1].trim() : "0", 
                                 source: parts[2].trim().replace(/"/g, ''),
+                                marketplacePlatform: parts[3].trim().replace(/"/g, ''),
                             });
                         }
                     });
@@ -507,6 +508,7 @@ export default function Home() {
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.platform}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${parseInt(item.payment_order, 10).toLocaleString()}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.source}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.marketplacePlatform}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -800,6 +802,7 @@ export default function Home() {
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Store Name</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment Order</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Marketplace</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
                                 </tr>
                             </thead>
                             <tbody id="backlog-table-body" className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -875,16 +878,6 @@ export default function Home() {
                         <div className="mt-8 relative h-96">
                              <canvas id={`${sec.id}-chart`}></canvas>
                         </div>
-                        <div className="mt-4 flex justify-center items-center gap-x-6 gap-y-2 flex-wrap">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                              <span style={{backgroundColor: sec.color}} className="w-3.5 h-3.5 rounded-sm inline-block"></span>
-                              <span>
-                                  {sec.id === 'pick' && 'Jumlah Order Pick'}
-                                  {sec.id === 'pack' && 'Jumlah Order Pack'}
-                                  {sec.id === 'shipped' && 'Jumlah Order Ship'}
-                              </span>
-                          </div>
-                      </div>
                     </div>
                 </div>
             ))}
